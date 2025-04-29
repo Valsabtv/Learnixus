@@ -1,0 +1,30 @@
+{
+    "subjects": [
+        {
+            "name": "Maths",
+            "chapters": [
+                {
+                    "name": "Integrals",
+                    "status": "not started"
+                },
+                {
+                    "name": "matrix",
+                    "status": "completed"
+                }
+            ]
+        },
+        {
+            "name": "physics",
+            "chapters": [
+                {
+                    "name": "optics",
+                    "status": "completed"
+                }
+            ]
+        },
+        {
+            "name": "chemistry",
+            "chapters": []
+        }
+    ]
+}
