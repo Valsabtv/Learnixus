@@ -73,6 +73,20 @@ def get_progress_report(data, subject_name = None):
         if subject_name:
             return  
 
+def add_note(data,subject_name,chapter_name,note_text):
+    subject = next((s for s in data['subjects'] if s['name'].lower() == subject_name.lower()), None)
+    if not subject:
+        print(f"Subject '{subject_name}' not found.")
+        return
+    
+    chapter = next((c for c in subject['chapters'] if c['name'].lower() == chapter_name.lower()), None)
+    if not chapter:
+        print(f"Chapter '{chapter_name}' not found in '{subject_name}'.")
+        return
+
+    chapter['notes'] = note_text
+    save_data(data)
+    print(f"Note added to {chapter_name} in {subject_name}")
 
 def parse_command(command,data):
    match = re.search(r'add subject (\w+)', command.lower())
@@ -106,6 +120,15 @@ def parse_command(command,data):
    if match:
        subject_name = match.group(1)
        get_progress_report(data, subject_name)
+
+   match = re.search(r'add note (.*) to (\w+) in (\w+)', command.lower())
+   if match:
+       note_text = match.group(1)
+       chapter_name = match.group(2)
+       subject_name = match.group(3)
+       add_note(data,subject_name,chapter_name,note_text)
+       return
+   
 
 print('sorry, I did not understand the command.')
 

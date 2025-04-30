@@ -18,7 +18,8 @@
             "chapters": [
                 {
                     "name": "optics",
-                    "status": "completed"
+                    "status": "completed",
+                    "notes": "completed"
                 }
             ]
         },
