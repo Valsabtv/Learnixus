@@ -46,3 +46,4 @@ Daily planner and revision suggestions
 Export notes and reports
 
 Gamified tracking (XP, streaks, etc.)
+have to make changes
