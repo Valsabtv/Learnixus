@@ -48,4 +48,3 @@ Export notes and reports
 Gamified tracking (XP, streaks, etc.)
 have to make quite few changes
 jst keeping streak.
-yup
