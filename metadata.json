@@ -1,0 +1,6 @@
+{
+  "name": "Learnixus",
+  "description": "A web application to track learning progress by subjects and chapters, featuring a modern dark theme, intuitive user interface, an engaging opening page, and a daily streak tracker to motivate users.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}
