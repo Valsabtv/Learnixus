@@ -28,7 +28,7 @@ import ExamPrepView from './components/ExamPrepView';
 import LoginPage from './components/LoginPage';
 import FeelingCheckModal from './components/FeelingCheckModal';
 import { supabase } from '../supabaseClient'; // Adjust path if needed
-import { VideoPlayer } from './components/VideoPlayer';
+import VideoPlayer from './components/VideoPlayer';
 import useUserData from './hooks/useUserData';
 
 

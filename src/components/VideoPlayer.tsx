@@ -1,9 +1,8 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import YouTube, { YouTubePlayer } from 'react-youtube';
-import { XIcon, TrashIcon, LinkIcon, PlusCircleIcon, PlayCircleIcon, VideoCameraIcon } from './IconComponents';
+import { XIcon, TrashIcon, LinkIcon, PlusCircleIcon, PlayCircleIcon, VideoCameraIcon } from './IconComponents'; // Assuming these icons exist
 import { useTheme } from '../contexts/ThemeContext';
 import { LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR } from '../constants';
-import { usePersistentVideoQueue } from '../hooks/usePersistentVideoQueue';
 
 interface PlaylistItem {
   id: string; // YouTube Video ID
@@ -11,18 +10,20 @@ interface PlaylistItem {
   thumbnail: string;
 }
 
-export const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+// Ensure you've added react-youtube to your index.html import map:
+// "react-youtube": "https://esm.sh/react-youtube?external=react"
+
+const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const { theme } = useTheme();
   const [videoUrlInput, setVideoUrlInput] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
-  const { videoQueue, setVideoQueue } = usePersistentVideoQueue();
 
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? (LIGHT_ACCENT_COLOR.split('-')[1] || '500') : (DARK_ACCENT_COLOR.split('-')[1] || '400');
 
-  // ... (style definitions remain the same)
+  // Theme-aware styles
   const pageBgClass = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900';
   const headerBgClass = theme === 'light' ? 'bg-white/90 backdrop-blur-md' : 'bg-slate-800/90 backdrop-blur-md'; // Added backdrop-blur for sticky
   const headerBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
@@ -67,34 +68,35 @@ export const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     return match ? match[1] : null;
   };
 
-  const fetchVideoDetails = useCallback(async (id: string): Promise<PlaylistItem | null> => {
+  const fetchVideoDetails = async (id: string): Promise<PlaylistItem | null> => {
     try {
       const thumbnail = `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
-      return { id, title: `Video: ${id.substring(0, 5)}...`, thumbnail };
+      // A more robust check might involve checking content-length or trying to parse it as an image
+      // For simplicity, assume if fetch for thumbnail works, it's a valid ID for thumbnail purposes.
+      return { id, title: `Video: ${id.substring(0,5)}...`, thumbnail };
     } catch (error) {
       console.error("Error fetching video details (thumbnail):", error);
       return null;
     }
-  }, []);
+  };
 
-  useEffect(() => {
-    const syncPlaylist = async () => {
-      const playlistItems = await Promise.all(videoQueue.map(fetchVideoDetails));
-      setPlaylist(playlistItems.filter((item): item is PlaylistItem => item !== null));
-    };
-    syncPlaylist();
-  }, [videoQueue, fetchVideoDetails]);
 
   const handleAddToPlaylist = async (e: React.FormEvent) => {
     e.preventDefault();
     const id = extractVideoId(videoUrlInput.trim());
     if (id) {
-      if (!videoQueue.includes(id)) {
-        setVideoQueue([...videoQueue, id]);
-      }
-      setVideoUrlInput('');
-      if (!currentVideoId) {
-        setCurrentVideoId(id);
+      const videoItem = await fetchVideoDetails(id);
+      if (videoItem) {
+        setPlaylist(prev => {
+          if (prev.find(v => v.id === id)) return prev; 
+          return [...prev, videoItem];
+        });
+        setVideoUrlInput('');
+        if (!currentVideoId) {
+          setCurrentVideoId(id);
+        }
+      } else {
+         alert("Could not fetch video details. The YouTube video might be private or not exist.");
       }
     } else {
       alert("Please enter a valid YouTube URL.");
@@ -106,20 +108,20 @@ export const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   const handleRemoveFromPlaylist = (idToRemove: string) => {
-    const newVideoQueue = videoQueue.filter(id => id !== idToRemove);
-    setVideoQueue(newVideoQueue);
+    const removedVideoIndex = playlist.findIndex(video => video.id === idToRemove);
+    const newPlaylist = playlist.filter(video => video.id !== idToRemove);
+    setPlaylist(newPlaylist);
 
     if (currentVideoId === idToRemove) {
-      if (newVideoQueue.length === 0) {
+      if (newPlaylist.length === 0) {
         setCurrentVideoId(null);
       } else {
-        const removedVideoIndex = videoQueue.findIndex(id => id === idToRemove);
-        const nextVideoIndex = Math.min(removedVideoIndex, newVideoQueue.length - 1);
-        setCurrentVideoId(newVideoQueue[nextVideoIndex]);
+        const nextVideoIndex = Math.min(removedVideoIndex, newPlaylist.length - 1);
+        setCurrentVideoId(newPlaylist[nextVideoIndex].id);
       }
     }
   };
-
+  
   const handleVideoEnd = () => {
     const currentIndex = playlist.findIndex(video => video.id === currentVideoId);
     if (currentIndex !== -1 && currentIndex < playlist.length - 1) {
@@ -142,6 +144,7 @@ export const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   return (
     <div className={`min-h-screen flex flex-col ${pageBgClass} transition-colors duration-300`}>
+      {/* Header - MODIFIED HERE */}
       <header className={`flex items-center justify-between px-4 sm:px-6 py-3.5 border-b ${headerBgClass} ${headerBorderClass} shadow-sm sticky top-0 z-20 transition-all duration-300`}>
         <div className="flex items-center gap-2">
           <VideoCameraIcon className={`w-7 h-7 ${headerTitleClass}`} />
@@ -272,3 +275,5 @@ export const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     </div>
   );
 };
+
+export default VideoPlayer;
