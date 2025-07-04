@@ -27,6 +27,7 @@ import { useNotification } from './contexts/NotificationContext';
 import ExamPrepView from './components/ExamPrepView'; 
 import LoginPage from './components/LoginPage';
 import FeelingCheckModal from './components/FeelingCheckModal';
+import FarewellPopup from './components/FarewellPopup';
 import { supabase } from '../supabaseClient'; // Adjust path if needed
 import VideoPlayer from './components/VideoPlayer';
 import useUserData from './hooks/useUserData';
@@ -116,6 +117,7 @@ const App: React.FC = () => {
 
   const [isFeelingCheckModalOpen, setIsFeelingCheckModalOpen] = useState(false);
   const [lastFeelingCheckDate, setLastFeelingCheckDate] = useUserData<string | null>('learnixus-lastFeelingCheckDate', null);
+  const [showFarewellPopup, setShowFarewellPopup] = useState(false);
 
 
   const ai = useMemo(() => {
@@ -167,16 +169,23 @@ const App: React.FC = () => {
   }, [isAuthenticated, hasCompletedInitialSetup, showOpeningPage, appContentVisible, lastFeelingCheckDate, ai]);
 
   const fetchStudyStrategies = useCallback(async () => {
-    if (!ai) { 
-        setStudyStrategies([
-          {id: 'default-1', text: `${userName || 'Learner'}, AI features are currently unavailable. Try the Feynman Technique: explain a concept in simple terms.`},
-          {id: 'default-2', text: `${userName || 'Learner'}, AI features are currently unavailable. Use active recall: regularly test yourself.`},
-          {id: 'default-3', text: `${userName || 'Learner'}, AI features are currently unavailable. Practice spaced repetition: review material at intervals.`}
-        ]);
+    const hasDefaultStrategies = studyStrategies.length > 0 && studyStrategies[0]?.id.startsWith('default-');
+
+    if (!ai) {
+        if (!hasDefaultStrategies) {
+            setStudyStrategies([
+              {id: 'default-1', text: `${userName || 'Learner'}, AI features are currently unavailable. Try the Feynman Technique: explain a concept in simple terms.`},
+              {id: 'default-2', text: `${userName || 'Learner'}, AI features are currently unavailable. Use active recall: regularly test yourself.`},
+              {id: 'default-3', text: `${userName || 'Learner'}, AI features are currently unavailable. Practice spaced repetition: review material at intervals.`}
+            ]);
+        }
         setStrategiesLoading(false);
         return;
     }
-    if (studyStrategies.length > 0 && !strategiesLoading) return; 
+
+    if (studyStrategies.length > 0 && !hasDefaultStrategies && !strategiesLoading) {
+        return;
+    }
 
     setStrategiesLoading(true);
     try {
@@ -211,11 +220,7 @@ const App: React.FC = () => {
       }
 
 
-      const prompt = `You are an academic advisor AI.
-Generate 3 unique, concise, and actionable study strategies for ${userName || 'Student'}, who is ${studyContextDescription}.${examContext}
-Each strategy should be 1-2 sentences long, directly addressing the student by name (e.g., "${userName || 'Learner'}, try...").
-Return the output as a JSON array of strings.
-Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining concepts in simple terms.", "To boost memory, ${userName || 'Student'}, use active recall by testing yourself regularly.", "${userName || 'Learner'}, practice spaced repetition by reviewing material at increasing intervals." ]`;
+      const prompt = `You are an academic advisor AI.\nGenerate 3 unique, concise, and actionable study strategies for ${userName || 'Student'}, who is ${studyContextDescription}.${examContext}\nEach strategy should be 1-2 sentences long, directly addressing the student by name (e.g., "${userName || 'Learner'}, try...").\nReturn the output as a JSON array of strings.\nExample: ["${userName || 'Learner'}, try the Feynman Technique by explaining concepts in simple terms.", "To boost memory, ${userName || 'Student'}, use active recall by testing yourself regularly.", "${userName || 'Learner'}, practice spaced repetition by reviewing material at increasing intervals." ]`;
 
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash-preview-04-17',
@@ -255,7 +260,7 @@ Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining con
     } finally {
       setStrategiesLoading(false);
     }
-  }, [ai, studyStrategies.length, setStudyStrategies, userStudyLevel, userName, selectedCollege, examPreparationInfo, strategiesLoading, addNotification]);
+  }, [ai, studyStrategies, setStudyStrategies, userStudyLevel, userName, selectedCollege, examPreparationInfo, strategiesLoading, addNotification]);
 
 
   useEffect(() => {
@@ -763,9 +768,11 @@ Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining con
 }, []);
 
 
-const handleLogout = useCallback(async () => {
-  console.log("Logout clicked");
+  const requestLogout = useCallback(() => {
+  setShowFarewellPopup(true);
+}, []);
 
+const handleLogout = useCallback(async () => {
   const { error } = await supabase.auth.signOut();
   if (error) {
     console.error("Logout error:", error.message);
@@ -777,9 +784,10 @@ const handleLogout = useCallback(async () => {
   localStorage.removeItem('lernixus_profile'); // Clear saved profile
   setIsAuthenticated(false);
   setAppContentVisible(false);
+  setShowFarewellPopup(false);
 
   addNotification("Logged out successfully.", "success");
-}, []);
+}, [addNotification, setIsAuthenticated]);
 
 
 useEffect(() => {
@@ -1050,7 +1058,7 @@ useEffect(() => {
         userStudyLevel={userStudyLevel}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         activeChapterContentInfo={activeChapterContentInfo}
-        onLogout={handleLogout}
+        onLogout={requestLogout}
       >
         <PomodoroTimer 
             isDashboardActive={activeView === 'dashboard'} 
@@ -1292,6 +1300,10 @@ useEffect(() => {
           onNavigateToChapter={handleNavigateFromSuggestion}
         />
       )}
+    <FarewellPopup
+        isOpen={showFarewellPopup}
+        onClose={handleLogout}
+      />
     </div>
   );
 };

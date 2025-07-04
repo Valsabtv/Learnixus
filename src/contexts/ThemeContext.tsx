@@ -13,30 +13,13 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  // Default to 'dark' if no theme is found in localStorage.
-  // The useUserData hook handles reading from localStorage first.
-  // If 'learnixus-theme' is not found, it will use this 'dark' as the initialValue.
-  const [persistedTheme, setPersistedTheme] = useUserData<Theme>('learnixus-theme', 'dark');
-  
-  const [theme, setTheme] = useState<Theme>(persistedTheme);
+  const [theme, setTheme] = useUserData<Theme>('learnixus-theme', 'dark');
 
   useEffect(() => {
-    // Ensure client-side state matches localStorage after hydration
-    setTheme(persistedTheme);
-  }, [persistedTheme]);
-  
-  useEffect(() => {
-    const root = window.document.documentElement; // Target the <html> element
-    if (theme === 'dark') {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    // Update persisted theme when local theme changes
-    if (theme !== persistedTheme) {
-        setPersistedTheme(theme);
-    }
-  }, [theme, persistedTheme, setPersistedTheme]);
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));

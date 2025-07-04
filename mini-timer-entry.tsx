@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import MiniTimer from './components/MiniTimer';
+import MiniTimer from "./src/components/MiniTimer";
 import { ThemeProvider } from './src/contexts/ThemeContext';
 
 const rootElement = document.getElementById('mini-root');

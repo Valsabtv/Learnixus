@@ -3,8 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR, APP_NAME } from '../constants';
-import { PlayIcon, PauseIcon, ArrowPathIcon, Cog6ToothIcon, XIcon } from './IconComponents';
-import useLocalStorage from '../hooks/useLocalStorage';
+import { PlayIcon, PauseIcon, ArrowPathIcon, Cog6ToothIcon} from './IconComponents';
 import useUserData from '../hooks/useUserData';
 import { useNotification } from '../contexts/NotificationContext'; 
 

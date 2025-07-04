@@ -69,16 +69,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin,
     return true;
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
-      onLogin(email, password);
-    }
-  };
+  const handleSubmit = (action: 'login' | 'signup') => {
+    if (!validateForm()) return;
 
-  const handleSignUpSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (validateForm()) {
+    if (action === 'login') {
+      onLogin(email, password);
+    } else {
       onSignUp(email, password);
     }
   };
@@ -93,7 +89,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin,
           <p className={`mt-1.5 text-sm ${textColor} text-center`}>Your personalized learning hub.</p>
         </div>
 
-        <form onSubmit={handleLoginSubmit} className="space-y-5">
+        <form onSubmit={(e) => { e.preventDefault(); handleSubmit('login'); }} className="space-y-5">
           <div>
             <label htmlFor="email" className={`block text-sm font-medium ${labelColor} mb-1.5`}>
               Email Address
@@ -126,7 +122,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin,
             />
           </div>
           
-          {error && <p id="error-message" className={`text-xs ${errorTextColor} text-center`}>{error}</p>}
+          {error && <p id="error-message" className={`text-xs ${errorTextColor} text-center`} aria-live="assertive">{error}</p>}
 
           <div className="space-y-3 pt-2">
             <button
@@ -138,7 +134,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin,
             </button>
             <button
               type="button"
-              onClick={handleSignUpSubmit}
+              onClick={() => handleSubmit('signup')}
               disabled={loading}
               className={`w-full ${secondaryButtonBg} font-semibold py-3 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out flex items-center justify-center text-sm focus:outline-none focus:ring-2 ${secondaryButtonFocusRing} focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-${cardBg.split('-')[1]}`} disabled:opacity-70`}
             >

@@ -35,8 +35,8 @@ const FeelingCheckModal: React.FC<FeelingCheckModalProps> = ({
 
 
   const accentColor = theme === 'light' ? LIGHT_ACCENT_COLOR : DARK_ACCENT_COLOR;
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-300';
-  const strongTextColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
+  const textColor = theme === 'light' ? 'text-slate-800' : 'text-slate-200';
+  const strongTextColor = theme === 'light' ? `text-${accentColor}-700` : `text-${accentColor}-400`;
   const errorColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
   const inputBgClass = theme === 'light' ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-600 border-slate-500 focus:ring-sky-500 focus:border-sky-500';
   const inputTextColor = theme === 'light' ? 'text-slate-900' : 'text-slate-50';
