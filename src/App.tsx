@@ -31,6 +31,7 @@ import FarewellPopup from './components/FarewellPopup';
 import { supabase } from '../supabaseClient'; // Adjust path if needed
 import VideoPlayer from './components/VideoPlayer';
 import useUserData from './hooks/useUserData';
+import { BookOpenIcon } from './components/IconComponents';
 
 
 interface ConfirmationModalConfig {
@@ -68,11 +69,12 @@ const App: React.FC = () => {
   const [currentSubjectIdForChapter, setCurrentSubjectIdForChapter] = useState<string | null>(null);
   const [currentSubjectNameForChapter, setCurrentSubjectNameForChapter] = useState<string | null>(null);
 
-  const [isAuthenticated, setIsAuthenticated] = useUserData<boolean>('learnixus-isAuthenticated', false);
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
-  const [hasCompletedInitialSetup, setHasCompletedInitialSetup] = useUserData<boolean>('learnixus-initialSetupDone', false);
+  const [hasCompletedInitialSetup, setHasCompletedInitialSetup] = useState(false);
   const [userStudyLevel, setUserStudyLevel] = useUserData<string>('learnixus-userStudyLevel', '');
   const [selectedCollege, setSelectedCollege] = useUserData<string>('learnixus-selectedCollege', '');
   const [userName, setUserName] = useUserData<string>('learnixus-userName', '');
@@ -387,8 +389,7 @@ const App: React.FC = () => {
         setSubjects(prevSubjects =>
           prevSubjects.map(subject =>
             subject.id === subjectId
-              ? { ...subject, chapters: subject.chapters.filter(ch => ch.id !== chapterId), lastInteractedDate: getTodayDateString() }
-              : subject
+              ? { ...subject, chapters: subject.chapters.filter(ch => ch.id !== chapterId), lastInteractedDate: getTodayDateString() } : subject
           )
         );
          addNotification(`Chapter "${chapterName}" has been deleted.`, 'info');
@@ -791,114 +792,66 @@ const handleLogout = useCallback(async () => {
 
 
 useEffect(() => {
-  const ensureProfileExists = async (user: any) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user.id)
-      .single();
+    setIsSessionLoading(true);
 
-    if (error && error.code === 'PGRST116') {
-      const { error: insertError } = await supabase.from('profiles').insert({
-        id: user.id,
-        email: user.email,
-      });
+    const handleAuthChange = async (session: any) => {
+      const user = session?.user;
 
-      if (insertError) {
-        console.error('Failed to create profile:', insertError.message);
+      if (user) {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username')
+          .eq('id', user.id)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error("Error fetching profile:", error);
+          addNotification("Error loading your profile. Please try again.", "error");
+          await supabase.auth.signOut(); // Log out on critical profile error
+          return;
+        }
+        
+        setIsAuthenticated(true);
+
+        if (profile && profile.username) {
+          // User has completed setup before
+          setUserName(profile.username);
+          setHasCompletedInitialSetup(true);
+          setShowOpeningPage(true);
+          setAppContentVisible(false); // Let opening page control this
+        } else {
+          // New user, or user who hasn't finished setup
+          setHasCompletedInitialSetup(false);
+        }
+      } else {
+        // User is not logged in
+        setIsAuthenticated(false);
+        setHasCompletedInitialSetup(false);
+        // Clear user-specific data for a clean login screen
+        setUserName('');
+        setUserStudyLevel('');
+        setSelectedCollege('');
+        setSubjects([]);
+        setExamPreparationInfo(null);
+        setExamActivities([]);
+        setGlobalNotes('');
       }
-    }
-  };
+      
+      setIsSessionLoading(false);
+    };
 
-  const fetchAndStoreProfile = async (user: any) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleAuthChange(session);
+    });
 
-    if (data) {
-      localStorage.setItem('lernixus_profile', JSON.stringify(data));
-    } else {
-      console.error('Profile fetch error:', error?.message || error);
-    }
-  };
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      handleAuthChange(session);
+    });
 
-  const getSessionAndInit = async () => {
-    const { data, error } = await supabase.auth.getSession();
-    const user = data?.session?.user;
-
-    if (user) {
-      setIsAuthenticated(true);
-      setAppContentVisible(true);
-      await ensureProfileExists(user);
-      await fetchAndStoreProfile(user);
-    } else {
-      setIsAuthenticated(false);
-      setAppContentVisible(false);
-    }
-
-    if (error) {
-      console.error('Session error:', error.message);
-    }
-  };
-
-  getSessionAndInit();
-
-  const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
-    const user = session?.user;
-
-    if (user) {
-      setIsAuthenticated(true);
-      setAppContentVisible(true);
-      await ensureProfileExists(user);
-      await fetchAndStoreProfile(user);
-    } else {
-      setIsAuthenticated(false);
-      setAppContentVisible(false);
-      localStorage.removeItem('lernixus_profile');
-    }
-  });
-
-  return () => {
-    listener?.subscription.unsubscribe();
-  };
-}, []);
-
-useEffect(() => {
-  const fetchUserData = async () => {
-    const session = await supabase.auth.getSession();
-    const user = session.data.session?.user;
-    if (!user) return;
-    const key = 'lernixus_subjects'; // This should match the key used in your Supabase table
-
-    const { data, error } = await supabase
-      .from('lernixus_data')
-      .select('data')
-      .eq('user_id', user.id)
-      .eq('key', key)
-      .maybeSingle();
-
-    if (error) {
-      console.error("Error fetching user data:", error);
-      return;
-    }
-
-    if (data && data.data) {
-      const userData = data.data;
-      setSubjects(userData.subjects || []);
-      setUserName(userData.userName || '');
-      setExamPreparationInfo(userData.examPreparationInfo || null);
-      // etc.
-    } else {
-      console.warn('No user data found in Supabase');
-
-}
-
-  };
-
-  fetchUserData();
-}, []);
+    return () => {
+      authListener?.subscription.unsubscribe();
+    };
+  }, [addNotification, setUserName, setUserStudyLevel, setSelectedCollege, setSubjects, setExamPreparationInfo, setExamActivities, setGlobalNotes]);
 
 
 
@@ -993,6 +946,14 @@ useEffect(() => {
   const darkAccentShade = DARK_ACCENT_COLOR.split('-')[1] || '400';
 
 
+  if (isSessionLoading) {
+    return (
+      <div className={`fixed inset-0 bg-slate-100 dark:bg-slate-900 flex items-center justify-center transition-opacity duration-300`}>
+        <BookOpenIcon className="w-24 h-24 text-sky-500 animate-pulse" />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <>
@@ -1073,10 +1034,10 @@ useEffect(() => {
                   aria-labelledby="daily-motivation-title" 
                   className={`p-5 sm:p-6 rounded-2xl shadow-xl hover:shadow-2xl ${theme === 'light' ? 'bg-white' : 'bg-slate-800'} border-l-4 ${theme === 'light' ? `border-${lightAccentName}-${lightAccentShade}` : `border-${darkAccentName}-${darkAccentShade}`} transition-all duration-300 ease-in-out hover:scale-[1.015]`}
                 >
-                  <h2 id="daily-motivation-title" className="sr-only">Daily Wisdom for {userName || 'Learner'}</h2>
+                  <h2 id="daily-motivation-title" className="sr-only">Daily Wisdom for ${userName || 'Learner'}</h2>
                   <blockquote className="text-center sm:text-left">
-                    <p className={`text-lg sm:text-xl italic ${theme === 'light' ? 'text-slate-700' : 'text-slate-200'} leading-relaxed`}>"{dailyQuote.text}"</p>
-                    <footer className={`mt-3 text-sm font-semibold tracking-wide ${theme === 'light' ? `text-${lightAccentName}-600` : `text-${darkAccentName}-400`}`}>— {dailyQuote.author}</footer>
+                    <p className={`text-lg sm:text-xl italic ${theme === 'light' ? 'text-slate-700' : 'text-slate-200'} leading-relaxed`}>"${dailyQuote.text}"</p>
+                    <footer className={`mt-3 text-sm font-semibold tracking-wide ${theme === 'light' ? `text-${lightAccentName}-600` : `text-${darkAccentName}-400`}`}>— ${dailyQuote.author}</footer>
                   </blockquote>
                 </section>
             )}
@@ -1246,7 +1207,7 @@ useEffect(() => {
             title="Study Strategy Deep Dive"
         >
             <div className={`p-1 ${theme === 'light' ? 'text-slate-700' : 'text-slate-200'}`}>
-                <p className="text-sm sm:text-base leading-relaxed">{selectedStrategy.text}</p>
+                <p className="text-sm sm:text-base leading-relaxed">${selectedStrategy.text}</p>
                 <div className="mt-6 flex justify-end">
                     <button
                     onClick={handleCloseStrategyDetailModal}
