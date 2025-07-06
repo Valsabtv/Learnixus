@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import useStreakTracker from './hooks/useStreakTracker';
 import { Subject, Chapter, ChapterStatus, QuizQuestion, FocusArea, StudyStrategy, ActiveView, ActiveChapterContentInfo, ExamPreparationInfo, ExamActivity, FeelingAIResponse, EasyChapterSuggestion } from './types';
 import { SUBJECT_COLORS, APP_NAME, LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR, OTHER_COLLEGE_PLACEHOLDER, NIRF_COLLEGES_INDIA_TOP_50, STUDY_LEVEL_OPTIONS, POPULAR_INDIAN_EXAMS,} from './constants';
@@ -120,6 +120,7 @@ const App: React.FC = () => {
   const [isFeelingCheckModalOpen, setIsFeelingCheckModalOpen] = useState(false);
   const [lastFeelingCheckDate, setLastFeelingCheckDate] = useUserData<string | null>('learnixus-lastFeelingCheckDate', null);
   const [showFarewellPopup, setShowFarewellPopup] = useState(false);
+  const initialAuthCheckCompleted = useRef(false);
 
 
   const ai = useMemo(() => {
@@ -389,7 +390,8 @@ const App: React.FC = () => {
         setSubjects(prevSubjects =>
           prevSubjects.map(subject =>
             subject.id === subjectId
-              ? { ...subject, chapters: subject.chapters.filter(ch => ch.id !== chapterId), lastInteractedDate: getTodayDateString() } : subject
+              ? { ...subject, chapters: subject.chapters.filter(ch => ch.id !== chapterId), lastInteractedDate: getTodayDateString() }
+              : subject
           )
         );
          addNotification(`Chapter "${chapterName}" has been deleted.`, 'info');
@@ -483,26 +485,7 @@ const App: React.FC = () => {
     updateSubjectInteraction(subjectId);
 
     try {
-      const prompt = `
-        You are a quiz generation assistant for a student named ${userName || 'there'}.
-        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",
-        and considering the student is at a "${userStudyLevel}" level,
-        generate ${numQuestions} distinct questions.
-        The questions should start relatively easy for the "${userStudyLevel}" level and progressively increase in difficulty, while all remaining appropriate for this study level.
-        
-        Formatting Instructions for Questions:
-        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.
-        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:
-          "[a, b]\\n[c, d]" or "a b\\nc d"
-          Ensure elements within a row are adequately spaced.
-        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.
-        
-        For each question, provide a concise, correct answer.
-        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).
-        Ensure the entire response is ONLY the JSON array string, nothing before or after.
-        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]
-        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".
-      `;
+      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${userStudyLevel}" level,\n        generate ${numQuestions} distinct questions.\n        The questions should start relatively easy for the "${userStudyLevel}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
       
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-2.5-flash-preview-04-17',
@@ -794,7 +777,7 @@ const handleLogout = useCallback(async () => {
 useEffect(() => {
     setIsSessionLoading(true);
 
-    const handleAuthChange = async (session: any) => {
+    const handleAuthChange = async (session: any, isInitialCall: boolean) => {
       const user = session?.user;
 
       if (user) {
@@ -807,27 +790,25 @@ useEffect(() => {
         if (error && error.code !== 'PGRST116') {
           console.error("Error fetching profile:", error);
           addNotification("Error loading your profile. Please try again.", "error");
-          await supabase.auth.signOut(); // Log out on critical profile error
+          await supabase.auth.signOut();
           return;
         }
         
         setIsAuthenticated(true);
 
         if (profile && profile.username) {
-          // User has completed setup before
           setUserName(profile.username);
           setHasCompletedInitialSetup(true);
-          setShowOpeningPage(true);
-          setAppContentVisible(false); // Let opening page control this
+          if (isInitialCall) {
+            setShowOpeningPage(true);
+            setAppContentVisible(false);
+          }
         } else {
-          // New user, or user who hasn't finished setup
           setHasCompletedInitialSetup(false);
         }
       } else {
-        // User is not logged in
         setIsAuthenticated(false);
         setHasCompletedInitialSetup(false);
-        // Clear user-specific data for a clean login screen
         setUserName('');
         setUserStudyLevel('');
         setSelectedCollege('');
@@ -835,17 +816,23 @@ useEffect(() => {
         setExamPreparationInfo(null);
         setExamActivities([]);
         setGlobalNotes('');
+        initialAuthCheckCompleted.current = false; // Reset for next login
       }
       
       setIsSessionLoading(false);
     };
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleAuthChange(session);
-    });
+    if (!initialAuthCheckCompleted.current) {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            handleAuthChange(session, true);
+            initialAuthCheckCompleted.current = true;
+        });
+    }
 
     const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-      handleAuthChange(session);
+        if (initialAuthCheckCompleted.current) { // Only run listener after initial check
+            handleAuthChange(session, false);
+        }
     });
 
     return () => {
@@ -861,22 +848,7 @@ useEffect(() => {
       return;
     }
     try {
-      const prompt = `
-        You are an empathetic AI companion for a student named ${userName || 'Learner'}.
-        The student is using the ${APP_NAME} app and has shared their current feeling: "${feelingText}"
-
-        Your tasks:
-        1. Provide a short (1-2 sentences), comforting, and understanding response to the student's feeling. Address them by name.
-        2. Determine an "actionHint" based on the feeling. Possible actionHints are: "none", "suggest_easy_chapter", "take_break".
-           - "take_break": If the feeling is strongly negative (e.g., "depressed", "hopeless", "overwhelmed", "burnt out", "crisis").
-           - "suggest_easy_chapter": If the feeling is mildly or moderately negative (e.g., "stressed", "tired", "a bit down", "sad", "frustrated", "unmotivated").
-           - "none": For positive or neutral feelings, or if unsure.
-
-        Return your entire response as a single, valid JSON object with two keys: "responseText" (string) and "actionHint" (string - one of the three specified values).
-        Example 1 (mildly negative): {"responseText": "I hear you, ${userName || 'Learner'}. It's okay to feel stressed sometimes. Remember to be kind to yourself.", "actionHint": "suggest_easy_chapter"}
-        Example 2 (strongly negative): {"responseText": "It sounds like you're going through a really tough time, ${userName || 'Learner'}. Please consider taking a break and focusing on your well-being.", "actionHint": "take_break"}
-        Example 3 (positive): {"responseText": "That's great to hear, ${userName || 'Learner'}! Keep that positive energy going into your studies.", "actionHint": "none"}
-      `;
+      const prompt = `\n        You are an empathetic AI companion for a student named ${userName || 'Learner'}.\n        The student is using the ${APP_NAME} app and has shared their current feeling: "${feelingText}"\n\n        Your tasks:\n        1. Provide a short (1-2 sentences), comforting, and understanding response to the student's feeling. Address them by name.\n        2. Determine an "actionHint" based on the feeling. Possible actionHints are: "none", "suggest_easy_chapter", "take_break".\n           - "take_break": If the feeling is strongly negative (e.g., "depressed", "hopeless", "overwhelmed", "burnt out", "crisis").\n           - "suggest_easy_chapter": If the feeling is mildly or moderately negative (e.g., "stressed", "tired", "a bit down", "sad", "frustrated", "unmotivated").\n           - "none": For positive or neutral feelings, or if unsure.\n\n        Return your entire response as a single, valid JSON object with two keys: "responseText" (string) and "actionHint" (string - one of the three specified values).\n        Example 1 (mildly negative): {"responseText": "I hear you, ${userName || 'Learner'}. It's okay to feel stressed sometimes. Remember to be kind to yourself.", "actionHint": "suggest_easy_chapter"}\n        Example 2 (strongly negative): {"responseText": "It sounds like you're going through a really tough time, ${userName || 'Learner'}. Please consider taking a break and focusing on your well-being.", "actionHint": "take_break"}\n        Example 3 (positive): {"responseText": "That's great to hear, ${userName || 'Learner'}! Keep that positive energy going into your studies.", "actionHint": "none"}\n      `;
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-preview-04-17',
         contents: prompt,
@@ -897,8 +869,6 @@ useEffect(() => {
         } else {
             throw new Error("AI response was not in the expected format.");
         }
-      } else {
-        throw new Error("AI returned an empty response.");
       }
     } catch (err) {
       console.error("Error in handleFeelingCheckSubmit:", err);
@@ -1032,8 +1002,7 @@ useEffect(() => {
             {dailyQuote && (
                  <section 
                   aria-labelledby="daily-motivation-title" 
-                  className={`p-5 sm:p-6 rounded-2xl shadow-xl hover:shadow-2xl ${theme === 'light' ? 'bg-white' : 'bg-slate-800'} border-l-4 ${theme === 'light' ? `border-${lightAccentName}-${lightAccentShade}` : `border-${darkAccentName}-${darkAccentShade}`} transition-all duration-300 ease-in-out hover:scale-[1.015]`}
-                >
+                  className={`p-5 sm:p-6 rounded-2xl shadow-xl hover:shadow-2xl ${theme === 'light' ? 'bg-white' : 'bg-slate-800'} border-l-4 ${theme === 'light' ? `border-${lightAccentName}-${lightAccentShade}` : `border-${darkAccentName}-${darkAccentShade}`} transition-all duration-300 ease-in-out hover:scale-[1.015]`}>
                   <h2 id="daily-motivation-title" className="sr-only">Daily Wisdom for ${userName || 'Learner'}</h2>
                   <blockquote className="text-center sm:text-left">
                     <p className={`text-lg sm:text-xl italic ${theme === 'light' ? 'text-slate-700' : 'text-slate-200'} leading-relaxed`}>"${dailyQuote.text}"</p>
@@ -1091,8 +1060,7 @@ useEffect(() => {
                 </p>
                 <button 
                     onClick={handleCloseChapterContentView}
-                    className={`mt-4 py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white`}`}
-                >
+                    className={`mt-4 py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white`}`}>
                     Back to My Learning
                 </button>
             </div>
@@ -1179,8 +1147,7 @@ useEffect(() => {
              <div className="mt-4 flex justify-end">
                  <button 
                     onClick={handleCloseQuizModal}
-                    className={`py-2 px-4 rounded-lg shadow-sm ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white`}`}
-                >
+                    className={`py-2 px-4 rounded-lg shadow-sm ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white`}`}>
                     Close
                 </button>
              </div>
@@ -1211,8 +1178,7 @@ useEffect(() => {
                 <div className="mt-6 flex justify-end">
                     <button
                     onClick={handleCloseStrategyDetailModal}
-                    className={`py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all text-sm font-semibold ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white focus:ring-${lightAccentName}-400` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white focus:ring-${darkAccentName}-400`} focus:outline-none focus:ring-2  focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-slate-800`}`}
-                    >
+                    className={`py-2 px-4 rounded-lg shadow-sm hover:shadow-md transition-all text-sm font-semibold ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white focus:ring-${lightAccentName}-400` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white focus:ring-${darkAccentName}-400`} focus:outline-none focus:ring-2  focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-slate-800`}`}>
                     Close
                     </button>
                 </div>
