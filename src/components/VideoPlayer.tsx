@@ -72,13 +72,22 @@ const VideoPlayer: React.FC = () => {
 
   const fetchVideoDetails = async (id: string): Promise<PlaylistItem | null> => {
     try {
-      const thumbnail = `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
-      // A more robust check might involve checking content-length or trying to parse it as an image
-      // For simplicity, assume if fetch for thumbnail works, it's a valid ID for thumbnail purposes.
-      return { id, title: `Video: ${id.substring(0,5)}...`, thumbnail };
+      // Use the oEmbed endpoint to get video details without an API key
+      const response = await fetch(`https://www.youtube.com/oembed?url=http://www.youtube.com/watch?v=${id}&format=json`);
+      if (!response.ok) {
+        // Fallback for private videos or errors
+        console.warn(`Could not fetch title for video ${id}. Status: ${response.status}`);
+        const thumbnail = `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+        return { id, title: `Video ID: ${id}`, thumbnail };
+      }
+      const data = await response.json();
+      const thumbnail = data.thumbnail_url || `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+      return { id, title: data.title, thumbnail };
     } catch (error) {
-      console.error("Error fetching video details (thumbnail):", error);
-      return null;
+      console.error("Error fetching video details:", error);
+      // Fallback in case of network error
+      const thumbnail = `https://img.youtube.com/vi/${id}/mqdefault.jpg`;
+      return { id, title: `Video ID: ${id}`, thumbnail };
     }
   };
 
