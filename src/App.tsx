@@ -83,7 +83,7 @@ const App: React.FC = () => {
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
 
-  const [showOpeningPage, setShowOpeningPage] = useState(true);
+  const [showOpeningPage, setShowOpeningPage] = useState(() => !sessionStorage.getItem('hasSeenOpeningPage'));
   const [appContentVisible, setAppContentVisible] = useState(false);
   const { currentStreak, checkAndProcessStreak } = useStreakTracker();
   const { theme } = useTheme();
@@ -146,6 +146,7 @@ const App: React.FC = () => {
 
   const handleOpeningPageExited = useCallback(() => {
     setShowOpeningPage(false);
+    sessionStorage.setItem('hasSeenOpeningPage', 'true');
   }, []); 
 
   useEffect(() => {
@@ -701,6 +702,7 @@ const App: React.FC = () => {
   setIsAuthenticated(true);
   setAuthLoading(false);
   setAuthError(null);
+  sessionStorage.removeItem('hasSeenOpeningPage');
   setShowOpeningPage(true);
   setAppContentVisible(false);
 }, []);
