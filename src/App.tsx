@@ -89,7 +89,7 @@ const App: React.FC = () => {
   const { theme } = useTheme();
   const { addNotification } = useNotification(); 
   const [dailyQuote, setDailyQuote] = useState<StoicQuote | null>(null);
-  const [activeView, setActiveView] = useState<ActiveView>('dashboard'); 
+  const [activeView, setActiveView] = useUserData<ActiveView>('learnixus-activeView', 'dashboard'); 
   const [globalNotes, setGlobalNotes] = useUserData<string>('learnixus-globalNotes', '');
   
   const [isChapterNotesModalOpen, setIsChapterNotesModalOpen] = useState(false);
