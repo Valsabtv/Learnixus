@@ -13,7 +13,7 @@ interface PlaylistItem {
 // Ensure you've added react-youtube to your index.html import map:
 // "react-youtube": "https://esm.sh/react-youtube?external=react"
 
-const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const VideoPlayer: React.FC = () => {
   const { theme } = useTheme();
   const [videoUrlInput, setVideoUrlInput] = useState('');
   const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
@@ -144,20 +144,7 @@ const VideoPlayer: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
   return (
     <div className={`min-h-screen flex flex-col ${pageBgClass} transition-colors duration-300`}>
-      {/* Header - MODIFIED HERE */}
-      <header className={`flex items-center justify-between px-4 sm:px-6 py-3.5 border-b ${headerBgClass} ${headerBorderClass} shadow-sm sticky top-0 z-20 transition-all duration-300`}>
-        <div className="flex items-center gap-2">
-          <VideoCameraIcon className={`w-7 h-7 ${headerTitleClass}`} />
-          <h1 className={`text-xl sm:text-2xl font-bold ${headerTitleClass} tracking-tight`}>Learnixus Video Hub</h1>
-        </div>
-        <button
-          onClick={onBack}
-          className={`${backButtonBase} ${backButtonBgClass}`}
-          aria-label="Go back"
-        >
-          <XIcon className={`w-5 h-5 ${backButtonIconClass}`} />
-        </button>
-      </header>
+      
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col lg:flex-row p-4 sm:p-6 gap-4 sm:gap-6">

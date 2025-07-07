@@ -1076,9 +1076,7 @@ useEffect(() => {
         )}
         {activeView === 'video' && (
             <div className={`${mainContentPadding}`}>
-                <VideoPlayer onBack={function (): void {
-              throw new Error('Function not implemented.');
-            } } />
+                <VideoPlayer />
             </div>
           )}
 
