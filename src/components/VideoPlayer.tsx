@@ -4,6 +4,8 @@ import { XIcon, TrashIcon, LinkIcon, PlusCircleIcon, PlayCircleIcon, VideoCamera
 import { useTheme } from '../contexts/ThemeContext';
 import { LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR } from '../constants';
 
+import useUserData from '../hooks/useUserData';
+
 interface PlaylistItem {
   id: string; // YouTube Video ID
   title: string;
@@ -16,7 +18,7 @@ interface PlaylistItem {
 const VideoPlayer: React.FC = () => {
   const { theme } = useTheme();
   const [videoUrlInput, setVideoUrlInput] = useState('');
-  const [playlist, setPlaylist] = useState<PlaylistItem[]>([]);
+  const [playlist, setPlaylist] = useUserData<PlaylistItem[]>('video-playlist', []);
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
   const playerRef = useRef<YouTubePlayer | null>(null);
 
