@@ -36,20 +36,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin,
   const [password, setPassword] = useState('');
 
   const accentColor = theme === 'light' ? LIGHT_ACCENT_COLOR : DARK_ACCENT_COLOR;
-  const pageBg = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900';
-  const cardBg = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
-  const headingColor = theme === 'light' ? 'text-slate-800' : 'text-slate-50';
+  const pageBg = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black';
+  const cardBg = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-200' : 'text-gray-300';
+  const headingColor = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-50' : 'text-gray-100';
   const appNameColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
-  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : 'text-slate-100 placeholder-slate-400';
-  const labelColor = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
+  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : theme === 'dark' ? 'text-slate-100 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400';
+  const labelColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
   const primaryButtonBg = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;
   const primaryButtonFocusRing = `focus:ring-${accentColor}-400`;
-  const secondaryButtonBg = theme === 'light' ? `bg-slate-200 hover:bg-slate-300 text-slate-700` : `bg-slate-600 hover:bg-slate-500 text-slate-200`;
+  const secondaryButtonBg = theme === 'light' ? `bg-slate-200 hover:bg-slate-300 text-slate-700` : theme === 'dark' ? `bg-slate-600 hover:bg-slate-500 text-slate-200` : `bg-gray-800 hover:bg-gray-700 text-gray-200`;
   const secondaryButtonFocusRing = theme === 'light' ? `focus:ring-slate-400` : `focus:ring-slate-500`;
-  const socialButtonBg = theme === 'light' ? 'bg-white hover:bg-slate-50 border-slate-300' : 'bg-slate-700 hover:bg-slate-600 border-slate-500';
-  const socialButtonTextColor = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
+  const socialButtonBg = theme === 'light' ? 'bg-white hover:bg-slate-50 border-slate-300' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 border-slate-500' : 'bg-gray-800 hover:bg-gray-700 border-gray-700';
+  const socialButtonTextColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-300';
   const errorTextColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
 
   const validateForm = () => {

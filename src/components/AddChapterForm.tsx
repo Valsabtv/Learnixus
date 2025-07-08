@@ -25,11 +25,11 @@ const AddChapterForm: React.FC<AddChapterFormProps> = ({ subjectId, onAddChapter
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
   
-  const labelColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300'; // Softer label
+  const labelColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400'; // Softer label
   const inputBgClass = theme === 'light' 
     ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' 
-    : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColorClass = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : 'text-slate-50 placeholder-slate-500'; // Ensure placeholder contrast
+    : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const inputTextColorClass = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : theme === 'dark' ? 'text-slate-50 placeholder-slate-500' : 'text-gray-200 placeholder-gray-500';
   
   const buttonBgClass = `bg-gradient-to-r from-${accentColorName}-${accentShade} to-${accentColorName}-${parseInt(accentShade) + 100} hover:from-${accentColorName}-${parseInt(accentShade) + 100} hover:to-${accentColorName}-${parseInt(accentShade) + 200}`;
   const buttonFocusRing = `focus-visible:ring-${accentColorName}-${parseInt(accentShade) - 100 < 100 ? 100 : parseInt(accentShade) - 100}`;

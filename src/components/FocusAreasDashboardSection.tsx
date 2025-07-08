@@ -15,15 +15,15 @@ const FocusAreasDashboardSection: React.FC<FocusAreasDashboardSectionProps> = ({
   const { theme } = useTheme();
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
 
-  const sectionBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-800/50';
-  const sectionBorderClass = theme === 'light' ? `border-slate-200` : `border-slate-700/60`; 
+  const sectionBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-800/50' : 'bg-gray-900/50';
+  const sectionBorderClass = theme === 'light' ? `border-slate-200` : theme === 'dark' ? `border-slate-700/60` : `border-gray-800/60`; 
   const titleColorClass = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-400`;
-  const textColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
-  const chapterNameColorClass = theme === 'light' ? 'text-slate-700' : 'text-slate-100';
-  const subjectNameColorClass = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
+  const textColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
+  const chapterNameColorClass = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-100' : 'text-gray-200';
+  const subjectNameColorClass = theme === 'light' ? 'text-slate-500' : theme === 'dark' ? 'text-slate-400' : 'text-gray-500';
 
-  const itemBgClass = theme === 'light' ? 'bg-white hover:bg-slate-50' : 'bg-slate-700 hover:bg-slate-600/70';
-  const itemBorderClass = theme === 'light' ? 'border-slate-200/80' : 'border-slate-600/70';
+  const itemBgClass = theme === 'light' ? 'bg-white hover:bg-slate-50' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600/70' : 'bg-gray-800 hover:bg-gray-700/70';
+  const itemBorderClass = theme === 'light' ? 'border-slate-200/80' : theme === 'dark' ? 'border-slate-600/70' : 'border-gray-700/70';
   
   const quizButtonBgClass = `bg-gradient-to-r from-${accentColorName}-400 to-${accentColorName}-500 hover:from-${accentColorName}-500 hover:to-${accentColorName}-600`;
   const quizButtonTextColorClass = 'text-white';

@@ -25,6 +25,10 @@
         background-color: #020617; /* slate-950 for dark theme - deep and premium */
     }
 
+    .amoled body {
+        background-color: #000000; /* amoled theme */
+    }
+
     /* General smooth transition for elements */
     * {
       transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
@@ -66,6 +70,18 @@
     }
     .dark ::-webkit-scrollbar-thumb:hover {
       background: #64748b; /* slate-500 for dark thumb hover */
+    }
+
+    /* Amoled mode scrollbar */
+    .amoled ::-webkit-scrollbar-track {
+      background: #1a1a1a; /* slightly lighter than black */
+    }
+    .amoled ::-webkit-scrollbar-thumb {
+      background: #4d4d4d; /* dark grey */
+      border-radius: 4px;
+    }
+    .amoled ::-webkit-scrollbar-thumb:hover {
+      background: #666666; /* lighter grey */
     }
 
     @keyframes fadeIn {

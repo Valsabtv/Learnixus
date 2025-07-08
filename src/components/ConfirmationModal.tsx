@@ -37,10 +37,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   const confirmButtonClass = isDestructive ? destructiveButtonBgClass : defaultConfirmButtonBgClass;
   const confirmFocusRingClass = isDestructive ? destructiveButtonFocusRing : defaultConfirmButtonFocusRing;
 
-  const cancelButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : 'bg-slate-600 hover:bg-slate-500/80 text-slate-200';
+  const cancelButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500/80 text-slate-200' : 'bg-gray-800 hover:bg-gray-700/80 text-gray-200';
   const cancelFocusRing = theme === 'light' ? 'focus:ring-slate-400' : 'focus:ring-slate-500';
 
-  const messageColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
+  const messageColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
   const iconColorClass = isDestructive ? (theme === 'light' ? 'text-red-500' : 'text-red-400') : (theme === 'light' ? `text-${accentColorName}-500` : `text-${accentColorName}-400`);
 
   return (

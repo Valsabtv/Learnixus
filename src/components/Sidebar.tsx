@@ -35,8 +35,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
 
-  const sidebarBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-800'; // Softer light bg
-  const borderColorClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
+  const sidebarBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900'; // Softer light bg
+  const borderColorClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
   const appNameMainColorClass = theme === 'light' ? 'text-slate-800' : 'text-slate-100'; // App name primary color
   const appNameAccentColorClass = theme === 'light' ? `text-${accentColorName}-${accentShade}` : `text-${accentColorName}-${accentShade}`;
   const iconColorClass = theme === 'light' ? `text-${accentColorName}-${accentShade}` : `text-${accentColorName}-${accentShade}`;
@@ -46,27 +46,27 @@ const Sidebar: React.FC<SidebarProps> = ({
   const addSubjectButtonFocusRing = `focus-visible:ring-${accentColorName}-${parseInt(accentShade) - 100 < 100 ? 100 : parseInt(accentShade) - 100}`;
 
   const navItemBaseClass = "flex items-center gap-3 px-3.5 py-2.5 rounded-lg transition-all duration-200 ease-in-out text-sm font-medium w-full group"; // Adjusted padding
-  const navItemDefaultText = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
-  const navItemDefaultHover = theme === 'light' ? 'hover:bg-slate-200/70 hover:text-slate-800' : 'hover:bg-slate-700 hover:text-slate-100';
+  const navItemDefaultText = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
+  const navItemDefaultHover = theme === 'light' ? 'hover:bg-slate-200/70 hover:text-slate-800' : theme === 'dark' ? 'hover:bg-slate-700 hover:text-slate-100' : 'hover:bg-gray-800 hover:text-gray-200';
   const navItemDefaultClass = `${navItemDefaultText} ${navItemDefaultHover}`;
   
   const navItemActiveText = theme === 'light' ? `text-${accentColorName}-${parseInt(accentShade) + 100 > 900 ? 900 : parseInt(accentShade) + 100}` : `text-${accentColorName}-${accentShade}`;
-  const navItemActiveBg = theme === 'light' ? `bg-${accentColorName}-100` : `bg-${accentColorName}-500/20`;
+  const navItemActiveBg = theme === 'light' ? `bg-${accentColorName}-100` : theme === 'dark' ? `bg-${accentColorName}-500/20` : `bg-${accentColorName}-500/20`;
   const navItemActiveClass = `${navItemActiveBg} ${navItemActiveText} font-semibold shadow-sm`;
   
-  const streakBgClass = theme === 'light' ? 'bg-amber-100 border-amber-200' : 'bg-amber-500/15 border-amber-500/30';
+  const streakBgClass = theme === 'light' ? 'bg-amber-100 border-amber-200' : theme === 'dark' ? 'bg-amber-500/15 border-amber-500/30' : 'bg-amber-500/10 border-amber-500/20';
   const streakTextColorClass = theme === 'light' ? 'text-amber-700' : 'text-amber-300';
   
-  const userInfoBgClass = theme === 'light' ? 'bg-slate-100' : 'bg-slate-700/50';
+  const userInfoBgClass = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-800/50';
   const userInfoPrimaryTextClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
   const userInfoSecondaryTextClass = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
   
-  const settingsButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80' : 'bg-slate-600/80 hover:bg-slate-600';
+  const settingsButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80' : theme === 'dark' ? 'bg-slate-600/80 hover:bg-slate-600' : 'bg-gray-800 hover:bg-gray-700';
   const settingsButtonTextClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
   const settingsButtonFocusRing = theme === 'light' ? `focus-visible:ring-${accentColorName}-500` : `focus-visible:ring-${accentColorName}-400`;
 
-  const closeButtonColorClass = theme === 'light' ? 'text-slate-500 hover:text-slate-700' : 'text-slate-400 hover:text-slate-200';
-  const closeButtonHoverBgClass = theme === 'light' ? 'hover:bg-slate-200/80' : 'hover:bg-slate-700/60';
+  const closeButtonColorClass = theme === 'light' ? 'text-slate-500 hover:text-slate-700' : theme === 'dark' ? 'text-slate-400 hover:text-slate-200' : 'text-gray-400 hover:text-gray-200';
+  const closeButtonHoverBgClass = theme === 'light' ? 'hover:bg-slate-200/80' : theme === 'dark' ? 'hover:bg-slate-700/60' : 'hover:bg-gray-800/60';
 
   const logoutButtonBgClass = theme === 'light' ? 'bg-rose-100 hover:bg-rose-200/80 text-rose-600' : 'bg-rose-700/40 hover:bg-rose-700/60 text-rose-300';
   const logoutButtonFocusRing = `focus-visible:ring-rose-500`;

@@ -26,20 +26,20 @@ const VideoPlayer: React.FC = () => {
   const accentShade = theme === 'light' ? (LIGHT_ACCENT_COLOR.split('-')[1] || '500') : (DARK_ACCENT_COLOR.split('-')[1] || '400');
 
   // Theme-aware styles
-  const pageBgClass = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900';
-  const headerBgClass = theme === 'light' ? 'bg-white/90 backdrop-blur-md' : 'bg-slate-800/90 backdrop-blur-md'; // Added backdrop-blur for sticky
+  const pageBgClass = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black';
+  const headerBgClass = theme === 'light' ? 'bg-white/90 backdrop-blur-md' : theme === 'dark' ? 'bg-slate-800/90 backdrop-blur-md' : 'bg-gray-900/90 backdrop-blur-md'; // Added backdrop-blur for sticky
   const headerBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
   const headerTitleClass = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-400`;
   const backButtonBase = `p-2 rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2`;
-  const backButtonBgClass = theme === 'light' ? `bg-slate-200 hover:bg-slate-300 focus-visible:ring-${accentColorName}-500 focus-visible:ring-offset-white` : `bg-slate-700 hover:bg-slate-600 focus-visible:ring-${accentColorName}-400 focus-visible:ring-offset-slate-800`;
+  const backButtonBgClass = theme === 'light' ? `bg-slate-200 hover:bg-slate-300 focus-visible:ring-${accentColorName}-500 focus-visible:ring-offset-white` : theme === 'dark' ? `bg-slate-700 hover:bg-slate-600 focus-visible:ring-${accentColorName}-400 focus-visible:ring-offset-slate-800` : `bg-gray-800 hover:bg-gray-700 focus-visible:ring-${accentColorName}-400 focus-visible:ring-offset-black`;
   const backButtonIconClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
 
-  const inputContainerBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
+  const inputContainerBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
   const inputLabelClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
   const inputBaseClass = `w-full px-3 py-2.5 rounded-lg border shadow-sm transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 text-sm`;
   const inputClasses = theme === 'light'
     ? `bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:ring-${accentColorName}-500 focus:border-${accentColorName}-500`
-    : `bg-slate-700 border-slate-600 text-slate-50 placeholder-slate-500 focus:ring-${accentColorName}-400 focus:border-${accentColorName}-400`;
+    : theme === 'dark' ? `bg-slate-700 border-slate-600 text-slate-50 placeholder-slate-500 focus:ring-${accentColorName}-400 focus:border-${accentColorName}-400` : `bg-gray-800 border-gray-700 text-gray-200 placeholder-gray-500 focus:ring-${accentColorName}-400 focus:border-${accentColorName}-400`;
   
   const addButtonTextClass = 'text-white';
   const addButtonBgClass = `bg-gradient-to-r from-${accentColorName}-${accentShade} to-${accentColorName}-${parseInt(accentShade) + 100} hover:from-${accentColorName}-${parseInt(accentShade) + 100} hover:to-${accentColorName}-${parseInt(accentShade) + 200 > 900 ? 900 : parseInt(accentShade) + 200}`;
@@ -47,13 +47,13 @@ const VideoPlayer: React.FC = () => {
 
 
   const videoPlayerWrapperBorderClass = theme === 'light' ? 'border-slate-300' : 'border-slate-700';
-  const playlistContainerBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
+  const playlistContainerBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
   const playlistContainerBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
   const playlistTitleClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
   
   const playlistItemBaseClass = `flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-all duration-200 ease-in-out shadow-sm border`;
-  const playlistItemDefaultBgClass = theme === 'light' ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300' : 'bg-slate-700/70 border-slate-600/80 hover:bg-slate-700 hover:border-slate-600';
-  const playlistItemActiveBgClass = theme === 'light' ? `bg-${accentColorName}-50 border-${accentColorName}-400 shadow-md` : `bg-${accentColorName}-500/30 border-${accentColorName}-500 shadow-md`;
+  const playlistItemDefaultBgClass = theme === 'light' ? 'bg-slate-50 border-slate-200 hover:bg-slate-100 hover:border-slate-300' : theme === 'dark' ? 'bg-slate-700/70 border-slate-600/80 hover:bg-slate-700 hover:border-slate-600' : 'bg-gray-800/70 border-gray-700/80 hover:bg-gray-800 hover:border-gray-700';
+  const playlistItemActiveBgClass = theme === 'light' ? `bg-${accentColorName}-50 border-${accentColorName}-400 shadow-md` : theme === 'dark' ? `bg-${accentColorName}-500/30 border-${accentColorName}-500 shadow-md` : `bg-${accentColorName}-900/30 border-${accentColorName}-800 shadow-md`;
   const playlistItemThumbnailBorderClass = theme === 'light' ? 'border-slate-300' : 'border-slate-600';
   const playlistItemTitleClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
   const removeButtonBase = `p-1.5 rounded-full transition-colors duration-150 ease-in-out focus:outline-none focus-visible:ring-1`;

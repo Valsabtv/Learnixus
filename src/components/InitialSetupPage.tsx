@@ -230,23 +230,23 @@ const InitialSetupPage: React.FC<InitialSetupPageProps> = ({
   };
 
 
-  const pageBg = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900';
-  const cardBg = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
-  const headingColor = theme === 'light' ? 'text-slate-800' : 'text-slate-50';
+  const pageBg = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black';
+  const cardBg = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-200' : 'text-gray-300';
+  const headingColor = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-50' : 'text-gray-100';
   const appNameColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
-  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : 'text-slate-100 placeholder-slate-400';
-  const labelColor = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
+  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : theme === 'dark' ? 'text-slate-100 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400';
+  const labelColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
   const buttonBg = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;
   const buttonFocusRing = `focus:ring-${accentColor}-400`;
-  const radioBorderColor = theme === 'light' ? 'border-slate-300' : 'border-slate-600';
+  const radioBorderColor = theme === 'light' ? 'border-slate-300' : theme === 'dark' ? 'border-slate-600' : 'border-gray-700';
   const radioCheckedBorderColor = theme === 'light' ? `border-${accentColor}-500` : `border-${accentColor}-400`;
   const radioRingColor = theme === 'light' ? `ring-${accentColor}-500` : `ring-${accentColor}-400`;
-  const dropdownBg = theme === 'light' ? 'bg-white' : 'bg-slate-700';
-  const dropdownItemHoverBg = theme === 'light' ? 'hover:bg-indigo-50' : 'hover:bg-sky-600';
-  const subSectionBg = theme === 'light' ? 'bg-slate-50/70' : 'bg-slate-700/40';
-  const subSectionBorder = theme === 'light' ? 'border-slate-200' : 'border-slate-600';
+  const dropdownBg = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-700' : 'bg-gray-800';
+  const dropdownItemHoverBg = theme === 'light' ? 'hover:bg-indigo-50' : theme === 'dark' ? 'hover:bg-sky-600' : 'hover:bg-gray-700';
+  const subSectionBg = theme === 'light' ? 'bg-slate-50/70' : theme === 'dark' ? 'bg-slate-700/40' : 'bg-gray-900/40';
+  const subSectionBorder = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-600' : 'border-gray-700';
 
 
   return (

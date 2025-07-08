@@ -36,7 +36,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentExamInfo,
   onUpdateExamInfo,
 }) => {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [nameInput, setNameInput] = useState(currentName);
   const [studyLevelInput, setStudyLevelInput] = useState(currentStudyLevel);
 
@@ -234,28 +234,28 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setIsExamDropdownOpen(false);
   };
 
-  const sectionTitleColor = theme === 'light' ? `text-slate-700` : `text-slate-200`;
-  const labelColor = theme === 'light' ? 'text-slate-600' : 'text-slate-400';
-  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : 'text-slate-100 placeholder-slate-400';
+  const sectionTitleColor = theme === 'light' ? `text-slate-700` : theme === 'dark' ? `text-slate-200` : `text-gray-200`;
+  const labelColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-400' : 'text-gray-400';
+  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : theme === 'dark' ? 'text-slate-100 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400';
   
   const buttonBg = theme === 'light' 
     ? `bg-gradient-to-r from-${lightAccentName}-500 to-${lightAccentName}-600 hover:from-${lightAccentName}-600 hover:to-${lightAccentName}-700`
     : `bg-gradient-to-r from-${darkAccentName}-500 to-${darkAccentName}-600 hover:from-${darkAccentName}-600 hover:to-${darkAccentName}-700`;
   const buttonFocusRing = theme === 'light' ? `focus:ring-${lightAccentName}-300` : `focus:ring-${darkAccentName}-300`;
   
-  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-slate-600 hover:bg-slate-500 text-slate-200';
+  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-slate-200' : 'bg-gray-800 hover:bg-gray-700 text-gray-200';
   const secondaryButtonFocusRing = theme === 'light' ? 'focus:ring-slate-400' : 'focus:ring-slate-500';
 
-  const radioBorderColor = theme === 'light' ? 'border-slate-300' : 'border-slate-600';
+  const radioBorderColor = theme === 'light' ? 'border-slate-300' : theme === 'dark' ? 'border-slate-600' : 'border-gray-700';
   const radioCheckedBorderColor = theme === 'light' ? `border-${lightAccentName}-500` : `border-${darkAccentName}-400`;
   const radioRingColor = theme === 'light' ? `ring-${lightAccentName}-500` : `ring-${darkAccentName}-400`;
   
-  const dropdownBg = theme === 'light' ? 'bg-white' : 'bg-slate-700';
+  const dropdownBg = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-700' : 'bg-gray-800';
   const dropdownItemHoverBg = theme === 'light' ? `hover:bg-${lightAccentName}-50` : `hover:bg-${darkAccentName}-600`;
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-300';
-  const subSectionBg = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/50';
-  const subSectionBorder = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
+  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
+  const subSectionBg = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-900/50';
+  const subSectionBorder = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
 
 
   return (
@@ -514,21 +514,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               Theme
             </label>
             <div className="flex items-center justify-start gap-3">
+              {/* Light Mode Button */}
               <button
-                onClick={toggleTheme}
+                onClick={() => setTheme('light')}
                 className={`flex items-center justify-center w-32 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200 ease-in-out shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
                   ${theme === 'light'
                     ? `bg-slate-200 text-slate-700 hover:bg-slate-300 focus:ring-slate-400 focus:ring-offset-slate-50`
-                    : `bg-slate-700 text-slate-200 hover:bg-slate-600 focus:ring-slate-500 focus:ring-offset-slate-700/50`
+                    : `bg-slate-100 text-slate-600 hover:bg-slate-200 focus:ring-slate-300 focus:ring-offset-slate-50`
                   }
                 `}
-                aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+                aria-label="Switch to Light Mode"
               >
-                {theme === 'light' ? <MoonIcon className="w-4 h-4 mr-1.5" /> : <SunIcon className="w-4 h-4 mr-1.5" />}
-                {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                <SunIcon className="w-4 h-4 mr-1.5" /> Light Mode
               </button>
-              <p className={`${textColor} text-xs`}>Current: {theme === 'light' ? 'Light Mode' : 'Dark Mode'}</p>
+
+              {/* Dark Mode Button */}
+              <button
+                onClick={() => setTheme('dark')}
+                className={`flex items-center justify-center w-32 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200 ease-in-out shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
+                  ${theme === 'dark'
+                    ? `bg-slate-700 text-slate-200 hover:bg-slate-600 focus:ring-slate-500 focus:ring-offset-slate-700/50`
+                    : `bg-slate-800 text-slate-300 hover:bg-slate-700 focus:ring-slate-600 focus:ring-offset-slate-800`
+                  }
+                `}
+                aria-label="Switch to Dark Mode"
+              >
+                <MoonIcon className="w-4 h-4 mr-1.5" /> Dark Mode
+              </button>
+
+              {/* AMOLED Mode Button */}
+              <button
+                onClick={() => setTheme('amoled')}
+                className={`flex items-center justify-center w-32 py-2.5 px-3 rounded-md text-sm font-medium transition-all duration-200 ease-in-out shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1
+                  ${theme === 'amoled'
+                    ? `bg-gray-900 text-gray-200 hover:bg-gray-800 focus:ring-gray-700 focus:ring-offset-black`
+                    : `bg-gray-800 text-gray-300 hover:bg-gray-700 focus:ring-gray-700 focus:ring-offset-black`
+                  }
+                `}
+                aria-label="Switch to AMOLED Mode"
+              >
+                <MoonIcon className="w-4 h-4 mr-1.5" /> AMOLED Mode
+              </button>
             </div>
+            <p className={`${textColor} text-xs mt-2`}>Current: {theme === 'light' ? 'Light Mode' : theme === 'dark' ? 'Dark Mode' : 'AMOLED Mode'}</p>
           </div>
         </section>
       </div>

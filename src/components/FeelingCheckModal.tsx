@@ -35,23 +35,23 @@ const FeelingCheckModal: React.FC<FeelingCheckModalProps> = ({
 
 
   const accentColor = theme === 'light' ? LIGHT_ACCENT_COLOR : DARK_ACCENT_COLOR;
-  const textColor = theme === 'light' ? 'text-slate-800' : 'text-slate-200';
+  const textColor = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-200' : 'text-gray-300';
   const strongTextColor = theme === 'light' ? `text-${accentColor}-700` : `text-${accentColor}-400`;
   const errorColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
-  const inputBgClass = theme === 'light' ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-600 border-slate-500 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColor = theme === 'light' ? 'text-slate-900' : 'text-slate-50';
+  const inputBgClass = theme === 'light' ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-600 border-slate-500 focus:ring-sky-500 focus:focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const inputTextColor = theme === 'light' ? 'text-slate-900' : theme === 'dark' ? 'text-slate-50' : 'text-gray-200';
   const buttonBgClass = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;
   const buttonFocusRing = `focus:ring-${accentColor}-300`;
-  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-slate-600 hover:bg-slate-500 text-slate-200';
+  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-slate-200' : 'bg-gray-800 hover:bg-gray-700 text-gray-200';
   const secondaryButtonFocusRing = theme === 'light' ? 'focus:ring-slate-400' : 'focus:ring-slate-500';
-  const responseBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/60';
-  const responseBorderClass = theme === 'light' ? `border-slate-200` : `border-slate-600/70`;
+  const responseBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/60' : 'bg-gray-900/60';
+  const responseBorderClass = theme === 'light' ? `border-slate-200` : theme === 'dark' ? `border-slate-600/70` : `border-gray-800/70`;
   const errorBgColor = theme === 'light' ? 'bg-red-50' : 'bg-red-500/10';
   const errorBorderColor = theme === 'light' ? 'border-red-300' : 'border-red-500';
-  const suggestionCardBg = theme === 'light' ? 'bg-indigo-50 hover:bg-indigo-100' : 'bg-sky-500/10 hover:bg-sky-500/20';
-  const suggestionCardBorder = theme === 'light' ? 'border-indigo-200' : 'border-sky-700';
-  const suggestionTitleColor = theme === 'light' ? 'text-indigo-700' : 'text-sky-300';
-  const suggestionTextColor = theme === 'light' ? 'text-indigo-600' : 'text-sky-400';
+  const suggestionCardBg = theme === 'light' ? 'bg-indigo-50 hover:bg-indigo-100' : theme === 'dark' ? 'bg-sky-500/10 hover:bg-sky-500/20' : 'bg-blue-900/20 hover:bg-blue-900/30';
+  const suggestionCardBorder = theme === 'light' ? 'border-indigo-200' : theme === 'dark' ? 'border-sky-700' : 'border-blue-800';
+  const suggestionTitleColor = theme === 'light' ? 'text-indigo-700' : theme === 'dark' ? 'text-sky-300' : 'text-blue-300';
+  const suggestionTextColor = theme === 'light' ? 'text-indigo-600' : theme === 'dark' ? 'text-sky-400' : 'text-blue-400';
 
 
   const handleInternalSubmit = () => {

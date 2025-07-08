@@ -33,21 +33,21 @@ const ChapterContentView: React.FC<ChapterContentViewProps> = ({
   const [error, setError] = useState<string | null>(null);
 
   const accentColor = theme === 'light' ? LIGHT_ACCENT_COLOR : DARK_ACCENT_COLOR;
-  const bgColor = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900';
-  const cardBgColor = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-300';
-  const headingColor = theme === 'light' ? 'text-slate-800' : 'text-slate-50';
+  const bgColor = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black';
+  const cardBgColor = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
+  const headingColor = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-50' : 'text-gray-200';
   const subHeadingColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
-  const borderColor = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
+  const borderColor = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
   const buttonBg = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;
   const buttonFocusRing = `focus:ring-${accentColor}-300`;
-  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : 'bg-slate-600 hover:bg-slate-500 text-slate-200';
+  const secondaryButtonBg = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300 text-slate-700' : theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500 text-slate-200' : 'bg-gray-800 hover:bg-gray-700 text-gray-200';
   const secondaryButtonFocusRing = theme === 'light' ? 'focus:ring-slate-400' : 'focus:ring-slate-500';
   const errorColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
   const errorBgColor = theme === 'light' ? 'bg-red-50' : 'bg-red-500/10';
   const errorBorderColor = theme === 'light' ? 'border-red-300' : 'border-red-500';
   const listDotColor = theme === 'light' ? `before:bg-${accentColor}-500` : `before:bg-${accentColor}-400`;
-  const imagePlaceholderBg = theme === 'light' ? 'bg-slate-200' : 'bg-slate-700';
+  const imagePlaceholderBg = theme === 'light' ? 'bg-slate-200' : theme === 'dark' ? 'bg-slate-700' : 'bg-gray-800';
   const insightTitleColor = theme === 'light' ? `text-${accentColor}-700` : `text-${accentColor}-300`;
 
   const fetchChapterContent = useCallback(async () => {

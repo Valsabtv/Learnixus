@@ -41,17 +41,17 @@ const PersonalNotesView: React.FC<PersonalNotesViewProps> = ({ initialNotes, onS
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
   
-  const mainBgClass = theme === 'light' ? 'bg-slate-100' : 'bg-slate-900'; // Consistent with Layout.tsx
+  const mainBgClass = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black'; // Consistent with Layout.tsx
   const textareaBgClass = theme === 'light' 
     ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' 
-    : 'bg-slate-800 border-slate-700 focus:ring-sky-500 focus:border-sky-500'; // Ensure border contrast
-  const textareaTextColorClass = theme === 'light' ? 'text-slate-800 placeholder-slate-500' : 'text-slate-100 placeholder-slate-400'; // Ensure text and placeholder contrast
+    : theme === 'dark' ? 'bg-slate-800 border-slate-700 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-900 border-gray-800 focus:ring-sky-500 focus:border-sky-500'; // Ensure border contrast
+  const textareaTextColorClass = theme === 'light' ? 'text-slate-800 placeholder-slate-500' : theme === 'dark' ? 'text-slate-100 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400'; // Ensure text and placeholder contrast
   
   const saveButtonBgClass = `bg-gradient-to-r from-${accentColorName}-${accentShade} to-${accentColorName}-${parseInt(accentShade) + 100} hover:from-${accentColorName}-${parseInt(accentShade) + 100} hover:to-${accentColorName}-${parseInt(accentShade) + 200}`;
   const saveButtonFocusRing = `focus-visible:ring-${accentColorName}-${parseInt(accentShade) - 100 < 100 ? 100 : parseInt(accentShade) - 100}`;
   const savedMessageColor = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-300`; // Better contrast for dark theme
 
-  const secondaryButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : 'bg-slate-700 hover:bg-slate-600/80 text-slate-200'; // Ensure text contrast
+  const secondaryButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600/80 text-slate-200' : 'bg-gray-800 hover:bg-gray-700/80 text-gray-200'; // Ensure text contrast
   const secondaryButtonFocusRing = theme === 'light' ? 'focus-visible:ring-slate-400' : 'focus-visible:ring-slate-500';
 
 

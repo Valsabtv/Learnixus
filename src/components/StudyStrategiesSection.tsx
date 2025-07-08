@@ -16,12 +16,12 @@ const StudyStrategiesSection: React.FC<StudyStrategiesSectionProps> = ({ strateg
   const { theme } = useTheme();
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
 
-  const sectionBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const sectionBorderClass = theme === 'light' ? 'border-slate-200/90' : 'border-slate-700/70';
+  const sectionBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const sectionBorderClass = theme === 'light' ? 'border-slate-200/90' : theme === 'dark' ? 'border-slate-700/70' : 'border-gray-800/70';
   const titleColorClass = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-400`;
-  const textColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
-  const cardBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/60';
-  const cardBorderClass = theme === 'light' ? `border-slate-200` : `border-slate-600/70`;
+  const textColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
+  const cardBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/60' : 'bg-gray-800/60';
+  const cardBorderClass = theme === 'light' ? `border-slate-200` : theme === 'dark' ? `border-slate-600/70` : `border-gray-700/70`;
   const cardHoverBgClass = theme === 'light' ? `hover:bg-${accentColorName}-50 hover:border-${accentColorName}-300` : `hover:bg-${accentColorName}-700/40 hover:border-${accentColorName}-500/80`;
 
 

@@ -213,8 +213,8 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
     }
   };
   
-  const timerBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const timerBorderClass = theme === 'light' ? 'border-slate-200/90' : 'border-slate-700/70';
+  const timerBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const timerBorderClass = theme === 'light' ? 'border-slate-200/90' : theme === 'dark' ? 'border-slate-700/70' : 'border-gray-800/70';
   const titleColorClass = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-400`;
   const timeColorClass = theme === 'light' ? 'text-slate-800' : 'text-slate-50';
   const modeTextColorClass = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
@@ -226,11 +226,11 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   
   const inputBgClass = theme === 'light' 
     ? 'bg-slate-100 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' 
-    : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
+    : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
   const inputTextColorClass = theme === 'light' ? 'text-slate-900' : 'text-slate-100';
   const labelColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-400';
-  const settingsCardBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/60';
-  const settingsCardBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-600/70';
+  const settingsCardBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/60' : 'bg-gray-800/60';
+  const settingsCardBorderClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-600/70' : 'border-gray-700/70';
 
 
   if (!isDashboardActive && !isActive) {

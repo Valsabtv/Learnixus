@@ -64,12 +64,12 @@ const QuizModal: React.FC<QuizModalProps> = ({
   const [overallFeedbackText, setOverallFeedbackText] = useState<string | null>(null);
   const [overallFeedbackLoading, setOverallFeedbackLoading] = useState<boolean>(false);
   
-  const textColor = theme === 'light' ? 'text-slate-700' : 'text-slate-300';
+  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
   const strongTextColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
   const errorColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
-  const contentBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/50';
-  const contentBorderClass = theme === 'light' ? `border-slate-200/70` : `border-slate-700/60`; 
-  const inputBgClass = theme === 'light' ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : 'bg-slate-600 border-slate-500 focus:ring-sky-500 focus:border-sky-500';
+  const contentBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/50' : 'bg-gray-900/50';
+  const contentBorderClass = theme === 'light' ? `border-slate-200/70` : theme === 'dark' ? `border-slate-700/60` : `border-gray-800/60`; 
+  const inputBgClass = theme === 'light' ? 'bg-white border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-600 border-slate-500 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
   const inputTextColor = theme === 'light' ? 'text-slate-900' : 'text-slate-50';
   
   const primaryButtonBg = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;

@@ -25,7 +25,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({ progress, height = 'h-2', cus
       
   const trackColorClass = customTrackColorClass 
     ? customTrackColorClass
-    : theme === 'light' ? 'bg-slate-200/80' : 'bg-slate-700/70';
+    : theme === 'light' ? 'bg-slate-200/80' : theme === 'dark' ? 'bg-slate-700/70' : 'bg-gray-800/70';
 
   return (
     <div className={`w-full ${trackColorClass} rounded-full ${height} overflow-hidden shadow-sm`}>

@@ -90,18 +90,18 @@ const ExamPrepView: React.FC<ExamPrepViewProps> = ({ examInfo, activities, userN
     return "Exam goal details are unavailable.";
   };
   
-  const cardBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const textColorClass = theme === 'light' ? 'text-slate-700' : 'text-slate-200';
+  const cardBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const textColorClass = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-200' : 'text-gray-300';
   const headingColorClass = theme === 'light' ? `text-${lightAccentName}-600` : `text-${darkAccentName}-400`;
-  const subTextColorClass = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
-  const borderColorClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
-  const calendarButtonBgClass = theme === 'light' ? 'bg-slate-100 hover:bg-slate-200' : 'bg-slate-700 hover:bg-slate-600';
+  const subTextColorClass = theme === 'light' ? 'text-slate-500' : theme === 'dark' ? 'text-slate-400' : 'text-gray-500';
+  const borderColorClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
+  const calendarButtonBgClass = theme === 'light' ? 'bg-slate-100 hover:bg-slate-200' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600' : 'bg-gray-800 hover:bg-gray-700';
   
-  const calendarDaySelectedBgClass = theme === 'light' ? `bg-${lightAccentName}-100` : `bg-${darkAccentName}-500/30`;
+  const calendarDaySelectedBgClass = theme === 'light' ? `bg-${lightAccentName}-100` : theme === 'dark' ? `bg-${darkAccentName}-500/30` : `bg-${darkAccentName}-900/30`;
   const calendarDaySelectedTextClass = theme === 'light' ? `text-${lightAccentName}-700` : `text-${darkAccentName}-200`;
   const calendarDayTodayBorderClass = theme === 'light' ? `border-${lightAccentName}-400` : `border-${darkAccentName}-500`;
   
-  const activityItemBg = theme === 'light' ? 'bg-slate-50' : 'bg-slate-700/60';
+  const activityItemBg = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-700/60' : 'bg-gray-800/60';
 
 
   return (

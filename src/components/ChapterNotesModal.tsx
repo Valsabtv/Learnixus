@@ -39,16 +39,16 @@ const ChapterNotesModal: React.FC<ChapterNotesModalProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
   
-  const labelColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';
+  const labelColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
   const textareaBgClass = theme === 'light' 
     ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' 
-    : 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500';
-  const textareaTextColorClass = theme === 'light' ? 'text-slate-900 placeholder-slate-500' : 'text-slate-50 placeholder-slate-400'; // Improved placeholder contrast
+    : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
+  const textareaTextColorClass = theme === 'light' ? 'text-slate-900 placeholder-slate-500' : theme === 'dark' ? 'text-slate-50 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400';
   
   const saveButtonBgClass = `bg-gradient-to-r from-${accentColorName}-${accentShade} to-${accentColorName}-${parseInt(accentShade) + 100} hover:from-${accentColorName}-${parseInt(accentShade) + 100} hover:to-${accentColorName}-${parseInt(accentShade) + 200}`;
   const saveButtonFocusRing = `focus-visible:ring-${accentColorName}-${parseInt(accentShade) - 100 < 100 ? 100 : parseInt(accentShade) - 100}`;
   
-  const secondaryButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : 'bg-slate-600 hover:bg-slate-500/80 text-slate-200';
+  const secondaryButtonBgClass = theme === 'light' ? 'bg-slate-200 hover:bg-slate-300/80 text-slate-700' : theme === 'dark' ? 'bg-slate-600 hover:bg-slate-500/80 text-slate-200' : 'bg-gray-800 hover:bg-gray-700/80 text-gray-200';
   const secondaryButtonFocusRing = theme === 'light' ? 'focus-visible:ring-slate-400' : 'focus-visible:ring-slate-500';
 
 

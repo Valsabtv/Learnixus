@@ -39,10 +39,10 @@ const SubjectList: React.FC<SubjectListProps> = ({
 
   if (subjects.length === 0) {
     const iconColorClass = theme === 'light' ? `text-${accentColorName}-${accentShade}` : `text-${accentColorName}-${accentShade}`;
-    const headingColorClass = theme === 'light' ? 'text-slate-800' : 'text-slate-100'; // Improved contrast
-    const textColorClass = theme === 'light' ? 'text-slate-600' : 'text-slate-300';   // Improved contrast
-    const containerBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-    const containerBorderClass = theme === 'light' ? 'border-slate-300' : 'border-slate-700';
+    const headingColorClass = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-100' : 'text-gray-200'; // Improved contrast
+    const textColorClass = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';   // Improved contrast
+    const containerBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+    const containerBorderClass = theme === 'light' ? 'border-slate-300' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
     
     const clickableClasses = onAddSubjectFromEmptyState 
       ? `cursor-pointer hover:bg-opacity-90 dark:hover:bg-opacity-95 transition-all duration-300 ease-in-out transform hover:scale-[1.01] hover:shadow-xl ${theme === 'light' ? 'hover:bg-slate-50' : 'hover:bg-slate-700/70'}`

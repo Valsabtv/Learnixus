@@ -38,7 +38,7 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
   
-  const chapterNameColorClass = theme === 'light' ? 'text-slate-800' : 'text-slate-100'; // Higher contrast for chapter name
+  const chapterNameColorClass = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-100' : 'text-gray-200'; // Higher contrast for chapter name
 
   const getProficiencyText = (level?: number): string => {
     if (level === undefined || level === 0) return "Not Assessed";
@@ -59,8 +59,8 @@ const ChapterItem: React.FC<ChapterItemProps> = ({
     }
   }
   
-  const itemBgClass = theme === 'light' ? 'bg-white hover:bg-slate-50/70' : 'bg-slate-700/80 hover:bg-slate-700'; // Slightly adjusted alpha for dark
-  const itemBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-600'; // Softer border
+  const itemBgClass = theme === 'light' ? 'bg-white hover:bg-slate-50/70' : theme === 'dark' ? 'bg-slate-700/80 hover:bg-slate-700' : 'bg-gray-800/80 hover:bg-gray-800'; // Slightly adjusted alpha for dark
+  const itemBorderClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-600' : 'border-gray-700'; // Softer border
   
   const utilityButtonBase = `p-2 rounded-lg transition-all duration-200 ease-in-out hover:scale-105 focus:outline-none focus-visible:ring-2`;
   const utilityButtonColorClass = theme === 'light' 

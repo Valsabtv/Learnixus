@@ -50,11 +50,11 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, maxWidt
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
 
-  const overlayBgClass = theme === 'light' ? 'bg-slate-500' : 'bg-slate-900'; 
-  const modalBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800';
-  const titleColorClass = theme === 'light' ? 'text-slate-800' : 'text-slate-100'; // Ensured contrast
-  const closeButtonColorClass = theme === 'light' ? 'text-slate-500 hover:text-slate-700' : 'text-slate-400 hover:text-slate-200'; // Ensured contrast
-  const modalBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700';
+  const overlayBgClass = theme === 'light' ? 'bg-slate-500' : theme === 'dark' ? 'bg-slate-900' : 'bg-black'; 
+  const modalBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
+  const titleColorClass = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-100' : 'text-gray-200'; // Ensured contrast
+  const closeButtonColorClass = theme === 'light' ? 'text-slate-500 hover:text-slate-700' : theme === 'dark' ? 'text-slate-400 hover:text-slate-200' : 'text-gray-400 hover:text-gray-200'; // Ensured contrast
+  const modalBorderClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800';
 
 
   return (

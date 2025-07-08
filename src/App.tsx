@@ -86,7 +86,7 @@ const App: React.FC = () => {
   const [showOpeningPage, setShowOpeningPage] = useState(() => !sessionStorage.getItem('hasSeenOpeningPage'));
   const [appContentVisible, setAppContentVisible] = useState(false);
   const { currentStreak, checkAndProcessStreak } = useStreakTracker();
-  const { theme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const { addNotification } = useNotification(); 
   const [dailyQuote, setDailyQuote] = useState<StoicQuote | null>(null);
   const [activeView, setActiveView] = useUserData<ActiveView>('learnixus-activeView', 'dashboard'); 

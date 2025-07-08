@@ -20,8 +20,8 @@ const GlobalNotificationDisplay: React.FC = () => {
         return { 
           Icon: CheckCircleIcon, 
           iconColor: theme === 'light' ? 'text-emerald-500' : 'text-emerald-400',
-          bgColor: theme === 'light' ? 'bg-emerald-50' : 'bg-emerald-800/90',
-          borderColor: theme === 'light' ? 'border-emerald-300' : 'border-emerald-700',
+          bgColor: theme === 'light' ? 'bg-emerald-50' : theme === 'dark' ? 'bg-emerald-800/90' : 'bg-emerald-900/90',
+          borderColor: theme === 'light' ? 'border-emerald-300' : theme === 'dark' ? 'border-emerald-700' : 'border-emerald-800',
           textColor: theme === 'light' ? 'text-emerald-700' : 'text-emerald-200',
           closeButtonHoverColor: theme === 'light' ? 'hover:text-emerald-700' : 'hover:text-emerald-300',
         };
@@ -29,8 +29,8 @@ const GlobalNotificationDisplay: React.FC = () => {
         return { 
           Icon: ExclamationTriangleIcon, 
           iconColor: theme === 'light' ? 'text-amber-500' : 'text-amber-400',
-          bgColor: theme === 'light' ? 'bg-amber-50' : 'bg-amber-800/90',
-          borderColor: theme === 'light' ? 'border-amber-300' : 'border-amber-700',
+          bgColor: theme === 'light' ? 'bg-amber-50' : theme === 'dark' ? 'bg-amber-800/90' : 'bg-amber-900/90',
+          borderColor: theme === 'light' ? 'border-amber-300' : theme === 'dark' ? 'border-amber-700' : 'border-amber-800',
           textColor: theme === 'light' ? 'text-amber-700' : 'text-amber-200',
           closeButtonHoverColor: theme === 'light' ? 'hover:text-amber-700' : 'hover:text-amber-300',
         };
@@ -38,8 +38,8 @@ const GlobalNotificationDisplay: React.FC = () => {
         return { 
           Icon: XCircleIcon, 
           iconColor: theme === 'light' ? 'text-red-500' : 'text-red-400',
-          bgColor: theme === 'light' ? 'bg-red-50' : 'bg-red-800/90',
-          borderColor: theme === 'light' ? 'border-red-300' : 'border-red-700',
+          bgColor: theme === 'light' ? 'bg-red-50' : theme === 'dark' ? 'bg-red-800/90' : 'bg-red-900/90',
+          borderColor: theme === 'light' ? 'border-red-300' : theme === 'dark' ? 'border-red-700' : 'border-red-800',
           textColor: theme === 'light' ? 'text-red-700' : 'text-red-200',
           closeButtonHoverColor: theme === 'light' ? 'hover:text-red-700' : 'hover:text-red-300',
         };
@@ -48,8 +48,8 @@ const GlobalNotificationDisplay: React.FC = () => {
         return { 
           Icon: LightbulbIcon, // Or a specific InfoIcon if you have one
           iconColor: theme === 'light' ? 'text-sky-500' : 'text-sky-400',
-          bgColor: theme === 'light' ? 'bg-sky-50' : 'bg-sky-800/90',
-          borderColor: theme === 'light' ? 'border-sky-300' : 'border-sky-700',
+          bgColor: theme === 'light' ? 'bg-sky-50' : theme === 'dark' ? 'bg-sky-800/90' : 'bg-sky-900/90',
+          borderColor: theme === 'light' ? 'border-sky-300' : theme === 'dark' ? 'border-sky-700' : 'border-sky-800',
           textColor: theme === 'light' ? 'text-sky-700' : 'text-sky-200',
           closeButtonHoverColor: theme === 'light' ? 'hover:text-sky-700' : 'hover:text-sky-300',
         };

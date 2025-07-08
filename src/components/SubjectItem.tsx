@@ -76,13 +76,13 @@ const SubjectItem: React.FC<SubjectItemProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
 
-  const cardBgClass = theme === 'light' ? 'bg-white' : 'bg-slate-800'; 
-  const cardBorderClass = theme === 'light' ? 'border-slate-200' : 'border-slate-700'; // Softer border
-  const contentBgClass = theme === 'light' ? 'bg-slate-50' : 'bg-slate-800/60'; // Adjusted for dark theme consistency
+  const cardBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900'; 
+  const cardBorderClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800'; // Softer border
+  const contentBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-800/60' : 'bg-gray-900/60'; // Adjusted for dark theme consistency
   
   const titleColorClass = 'text-white'; 
   const subtextColorClass = 'text-slate-100/90 dark:text-slate-200/80'; // Improved contrast for subtext on header
-  const emptyChapterTextColorClass = theme === 'light' ? 'text-slate-500' : 'text-slate-400';
+  const emptyChapterTextColorClass = theme === 'light' ? 'text-slate-500' : theme === 'dark' ? 'text-slate-400' : 'text-gray-400';
   
   const addChapterButtonBgClass = `bg-gradient-to-r from-${accentColorName}-${accentShade} to-${accentColorName}-${parseInt(accentShade) + 100} hover:from-${accentColorName}-${parseInt(accentShade) + 100} hover:to-${accentColorName}-${parseInt(accentShade) + 200}`;
   const addChapterButtonTextColorClass = 'text-white';
