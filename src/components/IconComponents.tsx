@@ -249,3 +249,15 @@ export const VideoCameraIcon: React.FC<{ className?: string }> = ({ className = 
     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9A2.25 2.25 0 0013.5 5.25h-9A2.25 2.25 0 002.25 7.5v9A2.25 2.25 0 004.5 18.75z" />
   </svg>
 );
+
+export const MaximizeIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m-6 12.75v-4.5m0 4.5h4.5m-4.5 0L9 15m11.25 4.5h-4.5m4.5 0v-4.5m0 4.5L15 15" />
+  </svg>
+);
+
+export const MinimizeIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9V4.5M15 9h4.5M15 9l5.25-5.25M15 15v4.5M15 15h4.5M15 15l5.25 5.25" />
+  </svg>
+);

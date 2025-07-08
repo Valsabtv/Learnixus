@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ProgressBar from './ProgressBar';
 import { useTheme } from '../contexts/ThemeContext';
 import { LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR } from '../constants';
-import { LayoutDashboardIcon, MenuIcon, DocumentTextIcon, ClipboardDocumentCheckIcon, BookOpenIcon } from './IconComponents'; 
+import { LayoutDashboardIcon, MenuIcon, DocumentTextIcon, ClipboardDocumentCheckIcon, BookOpenIcon, MaximizeIcon, MinimizeIcon } from './IconComponents'; 
 import { ActiveView } from '../types';
 
 
@@ -22,6 +22,19 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   toggleMobileSidebar 
 }) => {
   const { theme } = useTheme();
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+      setIsFullscreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+        setIsFullscreen(false);
+      }
+    }
+  };
 
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
@@ -68,15 +81,24 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
           <h2 className={`text-xl sm:text-2xl font-semibold ${titleColorClass}`}>{title}</h2>
         </div>
         
-        {showProgress && typeof overallProgress === 'number' && typeof completedChapters === 'number' && (
-          <div className="mt-2 sm:mt-0 w-full sm:w-auto max-w-xs sm:max-w-sm">
-            <div className="flex justify-between items-center mb-1 text-xs">
-              <span className={`font-medium ${progressTextColorClass}`}>Overall Progress</span>
-              <span className={`${progressValueColorClass}`}>{`${completedChapters} / ${totalChapters} Chapters`}</span>
+        <div className="flex items-center gap-2">
+          {showProgress && typeof overallProgress === 'number' && typeof completedChapters === 'number' && (
+            <div className="mt-2 sm:mt-0 w-full sm:w-auto max-w-xs sm:max-w-sm">
+              <div className="flex justify-between items-center mb-1 text-xs">
+                <span className={`font-medium ${progressTextColorClass}`}>Overall Progress</span>
+                <span className={`${progressValueColorClass}`}>{`${completedChapters} / ${totalChapters} Chapters`}</span>
+              </div>
+              <ProgressBar progress={overallProgress} height="h-2" />
             </div>
-            <ProgressBar progress={overallProgress} height="h-2" />
-          </div>
-        )}
+          )}
+          <button 
+            onClick={toggleFullscreen} 
+            className={`p-2 rounded-full ${menuButtonColorClass} transition-all duration-200 ease-in-out focus:outline-none focus-visible:ring-2 ${theme === 'light' ? `focus-visible:ring-${accentColorName}-${accentShade}` : `focus-visible:ring-${accentColorName}-${accentShade}`} hover:bg-slate-100 dark:hover:bg-slate-700/60 transform`}
+            aria-label="Toggle Fullscreen"
+          >
+            {isFullscreen ? <MinimizeIcon className="w-5 h-5" /> : <MaximizeIcon className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
       
        {activeView === 'subjects' && typeof totalChapters === 'number' && totalChapters === 0 && !showProgress && (
