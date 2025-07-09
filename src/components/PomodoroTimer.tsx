@@ -48,6 +48,16 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   const [mode, setMode] = useState<TimerMode>('work');
   const [pomodoroCount, setPomodoroCount] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
+  const [inputValues, setInputValues] = useState({
+    workDuration: String(settings.workDuration),
+    shortBreakDuration: String(settings.shortBreakDuration),
+    longBreakDuration: String(settings.longBreakDuration),
+  });
+  const [inputErrors, setInputErrors] = useState({
+    workDuration: '',
+    shortBreakDuration: '',
+    longBreakDuration: '',
+  });
 
   const miniTimerWindowRef = useRef<Window | null>(null);
   const originalDocTitleRef = useRef<string>(document.title);
@@ -59,7 +69,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
       isActive,
       mode,
       pomodoroCount,
-      theme,
+      theme: theme === 'light' || theme === 'dark' ? theme : 'dark',
     };
     localStorage.setItem(LOCAL_STORAGE_POMODORO_STATE_KEY, JSON.stringify(stateForMiniTimer));
   }, [settings, timeLeft, isActive, mode, pomodoroCount, theme]);
@@ -201,8 +211,23 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   };
 
   const handleSettingsChange = (field: keyof PomodoroSettings, value: string) => {
+    setInputValues(prev => ({ ...prev, [field]: value }));
+    if (inputErrors[field]) {
+      setInputErrors(prev => ({ ...prev, [field]: '' }));
+    }
+  };
+
+  const handleSettingsBlur = (field: keyof PomodoroSettings) => {
+    const value = inputValues[field];
+    if (value.trim() === '') {
+      setInputErrors(prev => ({ ...prev, [field]: 'Please enter a number.' }));
+      return;
+    }
     const numValue = parseInt(value, 10);
-    if (numValue > 0 && numValue <= 120) { 
+    if (isNaN(numValue) || numValue < 1 || numValue > 120) {
+      setInputErrors(prev => ({ ...prev, [field]: 'Enter a value between 1 and 120.' }));
+    } else {
+      setInputErrors(prev => ({ ...prev, [field]: '' }));
       const newSettings = { ...settings, [field]: numValue };
       setSettings(newSettings);
       if (!isActive) {
@@ -282,12 +307,14 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
               <input
                 type="number"
                 id={item.key}
-                value={item.value}
+                value={inputValues[item.key]}
                 onChange={(e) => handleSettingsChange(item.key, e.target.value)}
+                onBlur={() => handleSettingsBlur(item.key)}
                 min="1"
                 max="120"
                 className={`w-full border ${inputBgClass} ${inputTextColorClass} rounded-lg p-2.5 text-sm focus:ring-2 focus:outline-none transition-colors duration-200 ease-in-out shadow-sm text-center`}
               />
+              {inputErrors[item.key] && <p className={`text-xs mt-1 ${theme === 'light' ? 'text-red-600' : 'text-red-400'}`}>{inputErrors[item.key]}</p>}
             </div>
           ))}
         </div>
