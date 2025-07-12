@@ -688,56 +688,6 @@ const App: React.FC = () => {
     addNotification('Pomodoro session logged!', 'success');
   }, [setExamActivities, addNotification]);
 
-  const handleLogin = useCallback(async (email: string, pass: string) => {
-  setAuthLoading(true);
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
-
-  if (error) {
-    setAuthLoading(false);
-    setAuthError(error.message);
-    return;
-  }
-
-  addNotification(`Welcome back to ${APP_NAME}!`, 'success');
-  setIsAuthenticated(true);
-  setAuthLoading(false);
-  setAuthError(null);
-  sessionStorage.removeItem('hasSeenOpeningPage');
-  setShowOpeningPage(true);
-  setAppContentVisible(false);
-}, []);
-
-
-  const handleSignUp = useCallback(async (email: string, pass: string) => {
-  setAuthLoading(true);
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
-
-  if (error) {
-    setAuthLoading(false);
-    setAuthError(error.message);
-    return;
-  }
-
-  const user = data.user;
-
-  // ⬇️ Insert profile row
-  if (user) {
-    await supabase.from('profiles').insert({
-      id: user.id,
-      email: user.email,
-    });
-  }
-
-  addNotification(`Signed up successfully!`, 'success');
-  setIsAuthenticated(true);
-  setAuthLoading(false);
-  setAuthError(null);
-  setShowOpeningPage(true);
-  setAppContentVisible(false);
-}, []);
-
-
-  
   const handleSocialLogin = useCallback(async (provider: 'google' | 'github') => {
   setAuthLoading(true);
   const { error } = await supabase.auth.signInWithOAuth({
@@ -931,8 +881,6 @@ useEffect(() => {
       <>
         <GlobalNotificationDisplay />
         <LoginPage 
-          onLogin={handleLogin} 
-          onSignUp={handleSignUp}
           onSocialLogin={handleSocialLogin}
           loading={authLoading}
           error={authError}

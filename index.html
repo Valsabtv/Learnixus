@@ -116,6 +116,71 @@
       animation: pulseSlow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
     }
 
+    @keyframes blob-anim-1 {
+      0%, 100% { transform: scale(1) translate(0, 0); }
+      25% { transform: scale(1.2) translate(40px, -60px); }
+      50% { transform: scale(0.8) translate(-40px, 60px); }
+      75% { transform: scale(1.1) translate(-20px, 20px); }
+    }
+
+    @keyframes blob-anim-2 {
+      0%, 100% { transform: scale(1) translate(0, 0); }
+      25% { transform: scale(1.2) translate(-50px, 70px); }
+      50% { transform: scale(0.8) translate(50px, -70px); }
+      75% { transform: scale(1.1) translate(10px, -10px); }
+    }
+
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.5;
+    }
+
+    .blob-1 { animation: blob-anim-1 25s infinite ease-in-out; }
+    .blob-2 { animation: blob-anim-2 30s infinite ease-in-out; }
+
+    .floating-ui-container {
+      position: relative;
+      z-index: 10;
+    }
+
+    .floating-ui-container::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 500px;
+      height: 500px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(
+        circle at var(--mouse-x) var(--mouse-y),
+        rgba(255, 255, 255, 0.1),
+        transparent 40%
+      );
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+
+    .floating-ui-container:hover::before {
+      opacity: 1;
+    }
+
+    .glass-button {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    .glass-button:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
   </style>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

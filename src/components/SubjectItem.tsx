@@ -76,9 +76,9 @@ const SubjectItem: React.FC<SubjectItemProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
 
-  const cardBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900'; 
-  const cardBorderClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800'; // Softer border
-  const contentBgClass = theme === 'light' ? 'bg-slate-50' : theme === 'dark' ? 'bg-slate-800/60' : 'bg-gray-900/60'; // Adjusted for dark theme consistency
+  const cardBgClass = theme === 'light' ? 'bg-white/80' : theme === 'dark' ? 'bg-slate-800/80' : 'bg-gray-900/80'; 
+  const cardBorderClass = theme === 'light' ? 'border-slate-200/80' : theme === 'dark' ? 'border-slate-700/60' : 'border-gray-800/60'; // Softer border
+  const contentBgClass = theme === 'light' ? 'bg-slate-50/80' : theme === 'dark' ? 'bg-slate-800/40' : 'bg-gray-900/40'; // Adjusted for dark theme consistency
   
   const titleColorClass = 'text-white'; 
   const subtextColorClass = 'text-slate-100/90 dark:text-slate-200/80'; // Improved contrast for subtext on header
@@ -98,7 +98,7 @@ const SubjectItem: React.FC<SubjectItemProps> = ({
   const gradientToClass = `to-${subjectColorBase}-${parseInt(subjectColorShade) + 200 > 900 ? 900 : parseInt(subjectColorShade) + 200}`;   
 
   return (
-    <div className={`${cardBgClass} rounded-2xl shadow-xl border ${cardBorderClass} overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl`}>
+    <div className={`${cardBgClass} backdrop-blur-md rounded-2xl shadow-xl border ${cardBorderClass} overflow-hidden transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-2xl`}>
       <header 
         className={`group p-5 sm:p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 cursor-pointer transition-all duration-300 ease-in-out bg-gradient-to-br ${gradientFromClass} ${gradientToClass} hover:brightness-105`}
         onClick={() => setIsExpanded(!isExpanded)}

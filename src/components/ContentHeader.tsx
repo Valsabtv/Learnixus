@@ -39,8 +39,8 @@ const ContentHeader: React.FC<ContentHeaderProps> = ({
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
   const accentShade = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[1] || '500' : DARK_ACCENT_COLOR.split('-')[1] || '400';
 
-  const headerBgClass = theme === 'light' ? 'bg-white/80 backdrop-blur-md' : theme === 'dark' ? 'bg-slate-800/80 backdrop-blur-md' : 'bg-gray-900/80 backdrop-blur-md'; // Increased blur
-  const borderColorClass = theme === 'light' ? 'border-slate-200' : theme === 'dark' ? 'border-slate-700' : 'border-gray-800'; // Softer border
+  const headerBgClass = theme === 'light' ? 'bg-white/60 backdrop-blur-lg' : theme === 'dark' ? 'bg-slate-800/60 backdrop-blur-lg' : 'bg-gray-900/60 backdrop-blur-lg'; // Increased blur
+  const borderColorClass = theme === 'light' ? 'border-slate-200/80' : theme === 'dark' ? 'border-slate-700/60' : 'border-gray-800/60'; // Softer border
   const titleColorClass = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-100' : 'text-gray-200'; // Stronger title contrast
   const iconColorClass = theme === 'light' ? `text-${accentColorName}-${accentShade}` : `text-${accentColorName}-${accentShade}`;
   const menuButtonColorClass = theme === 'light' ? `text-slate-600 hover:text-${accentColorName}-${accentShade}` : theme === 'dark' ? `text-slate-400 hover:text-${accentColorName}-${accentShade}` : `text-gray-400 hover:text-${accentColorName}-${accentShade}`;

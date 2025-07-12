@@ -1,11 +1,8 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { APP_NAME, LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR } from '../constants';
-import { BookOpenIcon } from './IconComponents'; // Assuming you have a Google and Github icon, or will add them
-import { useNotification } from '../contexts/NotificationContext';
+import { BookOpenIcon } from './IconComponents';
 
-// Placeholder icons - replace with actual ones if available or create them in IconComponents
 const GoogleIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" }) => (
   <svg className={className} role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <title>Google</title>
@@ -21,154 +18,78 @@ const GitHubIcon: React.FC<{ className?: string }> = ({ className = "w-5 h-5" })
 );
 
 interface LoginPageProps {
-  onLogin: (email: string, pass: string) => void;
-  onSignUp: (email: string, pass: string) => void;
   onSocialLogin: (provider: 'google' | 'github') => void;
   loading: boolean;
   error: string | null;
   setError: (error: string | null) => void;
 }
 
-const LoginPage: React.FC<LoginPageProps> = ({ onLogin, onSignUp, onSocialLogin, loading, error, setError }) => {
+const LoginPage: React.FC<LoginPageProps> = ({ onSocialLogin, loading, error, setError }) => {
   const { theme } = useTheme();
-  const { addNotification } = useNotification();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      container.style.setProperty('--mouse-x', `${x}px`);
+      container.style.setProperty('--mouse-y', `${y}px`);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
 
   const accentColor = theme === 'light' ? LIGHT_ACCENT_COLOR : DARK_ACCENT_COLOR;
-  const pageBg = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black';
-  const cardBg = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
-  const textColor = theme === 'light' ? 'text-slate-700' : theme === 'dark' ? 'text-slate-200' : 'text-gray-300';
-  const headingColor = theme === 'light' ? 'text-slate-800' : theme === 'dark' ? 'text-slate-50' : 'text-gray-100';
-  const appNameColor = theme === 'light' ? `text-${accentColor}-600` : `text-${accentColor}-400`;
-  const inputBg = theme === 'light' ? 'bg-slate-50 border-slate-300 focus:ring-indigo-500 focus:border-indigo-500' : theme === 'dark' ? 'bg-slate-700 border-slate-600 focus:ring-sky-500 focus:border-sky-500' : 'bg-gray-800 border-gray-700 focus:ring-sky-500 focus:border-sky-500';
-  const inputTextColor = theme === 'light' ? 'text-slate-900 placeholder-slate-400' : theme === 'dark' ? 'text-slate-100 placeholder-slate-400' : 'text-gray-200 placeholder-gray-400';
-  const labelColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-400';
-  const primaryButtonBg = `bg-gradient-to-r from-${accentColor}-500 to-${accentColor}-600 hover:from-${accentColor}-600 hover:to-${accentColor}-700`;
-  const primaryButtonFocusRing = `focus:ring-${accentColor}-400`;
-  const secondaryButtonBg = theme === 'light' ? `bg-slate-200 hover:bg-slate-300 text-slate-700` : theme === 'dark' ? `bg-slate-600 hover:bg-slate-500 text-slate-200` : `bg-gray-800 hover:bg-gray-700 text-gray-200`;
-  const secondaryButtonFocusRing = theme === 'light' ? `focus:ring-slate-400` : `focus:ring-slate-500`;
-  const socialButtonBg = theme === 'light' ? 'bg-white hover:bg-slate-50 border-slate-300' : theme === 'dark' ? 'bg-slate-700 hover:bg-slate-600 border-slate-500' : 'bg-gray-800 hover:bg-gray-700 border-gray-700';
-  const socialButtonTextColor = theme === 'light' ? 'text-slate-600' : theme === 'dark' ? 'text-slate-300' : 'text-gray-300';
-  const errorTextColor = theme === 'light' ? 'text-red-600' : 'text-red-400';
+  const accentColorName = accentColor.split('-')[0];
 
-  const validateForm = () => {
-    if (!email.trim() || !password.trim()) {
-      setError("Email and password cannot be empty.");
-      return false;
-    }
-    if (!/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email address.");
-      return false;
-    }
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long.");
-      return false;
-    }
-    setError(null);
-    return true;
-  };
-
-  const handleSubmit = (action: 'login' | 'signup') => {
-    if (!validateForm()) return;
-
-    if (action === 'login') {
-      onLogin(email, password);
-    } else {
-      onSignUp(email, password);
-    }
-  };
-
+  const headingColor = theme === 'light' ? 'text-slate-100' : 'text-slate-50';
+  const textColor = theme === 'light' ? 'text-slate-200' : 'text-slate-300';
+  const appNameColor = `text-${accentColorName}-400`;
+  
+  const errorTextColor = theme === 'light' ? 'text-red-300' : 'text-red-400';
 
   return (
-    <div className={`min-h-screen ${pageBg} flex flex-col items-center justify-center p-4 sm:p-6 transition-colors duration-300 ease-in-out animate-fadeIn`}>
-      <div className={`w-full max-w-md ${cardBg} p-6 sm:p-8 rounded-xl shadow-2xl`}>
-        <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <BookOpenIcon className={`w-16 h-16 sm:w-20 sm:h-20 mb-3 ${appNameColor}`} />
-          <h1 className={`text-3xl sm:text-4xl font-bold ${headingColor}`}>{APP_NAME}</h1>
-          <p className={`mt-1.5 text-sm ${textColor} text-center`}>Your personalized learning hub.</p>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gray-900 transition-colors duration-300 ease-in-out animate-fadeIn overflow-hidden">
+      <div className="blob blob-1 bg-purple-500" style={{ top: '10%', left: '10%', width: '200px', height: '200px' }}></div>
+      <div className="blob blob-2 bg-sky-500" style={{ top: '50%', left: '70%', width: '300px', height: '300px' }}></div>
+      <div ref={containerRef} className="floating-ui-container w-full max-w-md text-center">
+        <div className="flex flex-col items-center mb-10">
+          <BookOpenIcon className={`w-24 h-24 sm:w-28 sm:h-28 mb-4 ${appNameColor}`} />
+          <h1 className={`text-5xl sm:text-6xl font-bold ${headingColor}`}>{APP_NAME}</h1>
+          <p className={`mt-3 text-lg ${textColor}`}>Unlock your potential. Sign in to continue.</p>
         </div>
 
-        <form onSubmit={(e) => { e.preventDefault(); handleSubmit('login'); }} className="space-y-5">
-          <div>
-            <label htmlFor="email" className={`block text-sm font-medium ${labelColor} mb-1.5`}>
-              Email Address
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              className={`w-full border ${inputBg} ${inputTextColor} rounded-lg p-3 focus:ring-2 focus:outline-none transition-colors duration-200 ease-in-out shadow-sm text-sm`}
-              required
-              aria-describedby={error ? "error-message" : undefined}
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className={`block text-sm font-medium ${labelColor} mb-1.5`}>
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              className={`w-full border ${inputBg} ${inputTextColor} rounded-lg p-3 focus:ring-2 focus:outline-none transition-colors duration-200 ease-in-out shadow-sm text-sm`}
-              required
-              aria-describedby={error ? "error-message" : undefined}
-            />
-          </div>
-          
-          {error && <p id="error-message" className={`text-xs ${errorTextColor} text-center`} aria-live="assertive">{error}</p>}
-
-          <div className="space-y-3 pt-2">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full ${primaryButtonBg} text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 ease-in-out flex items-center justify-center text-sm focus:outline-none focus:ring-2 ${primaryButtonFocusRing} focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-${cardBg.split('-')[1]}`} disabled:opacity-70`}
-            >
-              {loading ? 'Logging in...' : 'Login'}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSubmit('signup')}
-              disabled={loading}
-              className={`w-full ${secondaryButtonBg} font-semibold py-3 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out flex items-center justify-center text-sm focus:outline-none focus:ring-2 ${secondaryButtonFocusRing} focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-${cardBg.split('-')[1]}`} disabled:opacity-70`}
-            >
-              {loading ? 'Signing up...' : 'Sign Up'}
-            </button>
-          </div>
-        </form>
-
-        <div className="my-6 sm:my-8 flex items-center">
-          <hr className={`flex-grow border-t ${theme === 'light' ? 'border-slate-300' : 'border-slate-600'}`} />
-          <span className={`px-3 text-xs ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>Or continue with</span>
-          <hr className={`flex-grow border-t ${theme === 'light' ? 'border-slate-300' : 'border-slate-600'}`} />
-        </div>
-
-        <div className="space-y-3">
+        <div className="space-y-5">
           <button
             type="button"
             onClick={() => onSocialLogin('google')}
             disabled={loading}
-            className={`w-full border ${socialButtonBg} ${socialButtonTextColor} font-medium py-2.5 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out flex items-center justify-center gap-2 text-sm focus:outline-none focus:ring-2 ${theme === 'light' ? 'focus:ring-slate-300' : 'focus:ring-slate-500'} focus:ring-offset-1 disabled:opacity-70`}
+            className={`glass-button w-full font-medium py-4 px-5 rounded-xl shadow-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-3 text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-70`}
           >
-            <GoogleIcon className="w-5 h-5" /> Continue with Google
+            <GoogleIcon className="w-6 h-6" /> Continue with Google
           </button>
           <button
             type="button"
             onClick={() => onSocialLogin('github')}
             disabled={loading}
-            className={`w-full border ${socialButtonBg} ${socialButtonTextColor} font-medium py-2.5 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 ease-in-out flex items-center justify-center gap-2 text-sm focus:outline-none focus:ring-2 ${theme === 'light' ? 'focus:ring-slate-300' : 'focus:ring-slate-500'} focus:ring-offset-1 disabled:opacity-70`}
+            className={`glass-button w-full font-medium py-4 px-5 rounded-xl shadow-lg transition-all duration-300 ease-in-out flex items-center justify-center gap-3 text-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-70`}
           >
-            <GitHubIcon className="w-5 h-5" /> Continue with GitHub
+            <GitHubIcon className="w-6 h-6" /> Continue with GitHub
           </button>
         </div>
+
+        {error && <p id="error-message" className={`text-base ${errorTextColor} text-center mt-8`} aria-live="assertive">{error}</p>}
+
       </div>
-      <p className={`mt-8 text-xs ${theme === 'light' ? 'text-slate-500' : 'text-slate-400'}`}>
+      <p className={`mt-12 text-sm ${textColor} opacity-70`}>
         &copy; {new Date().getFullYear()} {APP_NAME}
       </p>
     </div>
