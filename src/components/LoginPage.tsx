@@ -57,14 +57,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSocialLogin, loading, error, se
   const errorTextColor = theme === 'light' ? 'text-red-300' : 'text-red-400';
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-6 bg-gray-900 transition-colors duration-300 ease-in-out animate-fadeIn overflow-hidden">
-      <div className="blob blob-1 bg-purple-500" style={{ top: '10%', left: '10%', width: '200px', height: '200px' }}></div>
-      <div className="blob blob-2 bg-sky-500" style={{ top: '50%', left: '70%', width: '300px', height: '300px' }}></div>
-      <div ref={containerRef} className="floating-ui-container w-full max-w-md text-center">
+    <div className="min-h-screen w-full relative bg-black flex flex-col items-center justify-center p-4 sm:p-6">
+    {/* Magenta Nebula Background with Top Glow */}
+    <div
+      className="absolute inset-0 z-0"
+      style={{
+        background: "radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6, 182, 212, 0.25), transparent 70%), #000000",
+      }}
+    />
+  
+    {/* Your Content/Components */}
+    <div ref={containerRef} className="w-full max-w-md text-center z-10 floating-ui-container">
         <div className="flex flex-col items-center mb-10">
-          <BookOpenIcon className={`w-24 h-24 sm:w-28 sm:h-28 mb-4 ${appNameColor}`} />
-          <h1 className={`text-5xl sm:text-6xl font-bold ${headingColor}`}>{APP_NAME}</h1>
-          <p className={`mt-3 text-lg ${textColor}`}>Unlock your potential. Sign in to continue.</p>
+            <BookOpenIcon className={`w-24 h-24 sm:w-28 sm:h-28 mb-4 ${appNameColor}`} />
+            <h1 className={`text-5xl sm:text-6xl font-bold ${headingColor}`}>{APP_NAME}</h1>
+            <p className={`mt-3 text-lg ${textColor}`}>Unlock your potential. Sign in to continue.</p>
         </div>
 
         <div className="space-y-5">
