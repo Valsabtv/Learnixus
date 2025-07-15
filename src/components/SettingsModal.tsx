@@ -5,6 +5,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { STUDY_LEVEL_OPTIONS, NIRF_COLLEGES_INDIA_TOP_50, LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR, OTHER_COLLEGE_PLACEHOLDER, POPULAR_INDIAN_EXAMS, EXAM_PREP_OTHER_KEY, EXAM_PREP_GENERAL_FINALS_KEY } from '../constants';
 import { SunIcon, MoonIcon, ChevronDownIcon, UserCircleIcon, BookOpenIcon, PaintBrushIcon, ClipboardDocumentCheckIcon } from './IconComponents';
 import { ExamPreparationInfo, ExamGoalType } from '../types';
+import { supabase } from '../../supabaseClient';
+import { useSession } from '@supabase/auth-helpers-react';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -37,6 +39,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateExamInfo,
 }) => {
   const { theme, setTheme } = useTheme();
+  const session = useSession();
+  const user = session?.user;
   const [nameInput, setNameInput] = useState(currentName);
   const [studyLevelInput, setStudyLevelInput] = useState(currentStudyLevel);
 
@@ -161,11 +165,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return groups;
   }, [examSearchTerm]);
 
-  const handleSaveName = () => {
-    if (nameInput.trim()) {
-      onUpdateName(nameInput.trim());
-      setNameSavedMessage(true);
-      setTimeout(() => setNameSavedMessage(false), 2000);
+  const handleSaveName = async () => {
+    if (nameInput.trim() && user) {
+      try {
+        const { error } = await supabase
+          .from('profiles')
+          .update({ username: nameInput.trim() })
+          .eq('id', user.id);
+
+        if (error) {
+          console.error("Error updating name:", error.message);
+          return;
+        }
+
+        onUpdateName(nameInput.trim());
+        setNameSavedMessage(true);
+        setTimeout(() => setNameSavedMessage(false), 2000);
+      } catch (error: any) {
+        console.error("Error updating name:", error.message);
+      }
     }
   };
 

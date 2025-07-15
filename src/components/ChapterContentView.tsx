@@ -129,6 +129,7 @@ const ChapterContentView: React.FC<ChapterContentViewProps> = ({
               imageUrl: PLACEHOLDER_IMAGE_URL, // Ensure it's always the placeholder
             }));
             setInsights(insightsFromParse);
+            generateImagesForInsights(insightsFromParse);
           } else {
             console.error("Parsed JSON is not an array of valid Insight objects or is empty. Parsed data:", parsedData);
             throw new Error("Parsed JSON is not an array of valid Insight objects or is empty.");
@@ -154,6 +155,50 @@ const ChapterContentView: React.FC<ChapterContentViewProps> = ({
       setIsLoading(false);
     }
   }, [ai, userName, userStudyLevel, chapterName, subjectName]);
+
+  const generateImagesForInsights = async (currentInsights: Insight[]) => {
+    for (let i = 0; i < currentInsights.length; i++) {
+      try {
+        const insight = currentInsights[i];
+        const imagePrompt = `
+          Create a visually appealing and educational image that represents the following concept:
+          **Title:** ${insight.title}
+          **Description:** ${insight.description}
+          The image should be clear, concise, and relevant to the topic. 
+          Style: digital illustration, vibrant colors, and a clean aesthetic.
+        `;
+        
+        const response = await fetch(
+            "https://api.deepai.org/api/text2img",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "api-key": "quickstart-QUdJIGlzIGNvbWluZy4uLi4K", // Using a public example key
+                },
+                body: JSON.stringify({
+                    text: imagePrompt,
+                    grid_size: "1",
+                }),
+            }
+        );
+
+        const result = await response.json();
+        const imageUrl = result.output_url;
+
+        if (imageUrl) {
+          setInsights(prevInsights => {
+            if (!prevInsights) return null;
+            const newInsights = [...prevInsights];
+            newInsights[i].imageUrl = imageUrl;
+            return newInsights;
+          });
+        }
+      } catch (error) {
+        console.error(`Failed to generate image for insight ${i}:`, error);
+      }
+    }
+  };
 
   useEffect(() => {
     fetchChapterContent();
@@ -192,8 +237,14 @@ const ChapterContentView: React.FC<ChapterContentViewProps> = ({
               <p className="whitespace-pre-wrap text-sm sm:text-base">{currentInsight.description}</p>
               
               <div className={`my-3 p-3 rounded-lg ${imagePlaceholderBg} flex flex-col items-center justify-center h-40 sm:h-48 shadow-inner`}>
-                <BookOpenIcon className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 ${textColor} opacity-40`} />
-                <p className={`${textColor} text-xs sm:text-sm`}>Visual learning aid.</p>
+                {currentInsight.imageUrl !== PLACEHOLDER_IMAGE_URL ? (
+                  <img src={currentInsight.imageUrl} alt={currentInsight.title} className="w-full h-full object-cover rounded-lg" />
+                ) : (
+                  <>
+                    <BookOpenIcon className={`w-8 h-8 sm:w-10 sm:h-10 mb-2 ${textColor} opacity-40`} />
+                    <p className={`${textColor} text-xs sm:text-sm`}>Visual learning aid.</p>
+                  </>
+                )}
               </div>
 
               {currentInsight.keyPoints && currentInsight.keyPoints.length > 0 && (
