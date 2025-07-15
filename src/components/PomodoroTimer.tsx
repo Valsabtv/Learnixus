@@ -1,27 +1,24 @@
-
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR, APP_NAME } from '../constants';
-import { PlayIcon, PauseIcon, ArrowPathIcon, Cog6ToothIcon} from './IconComponents';
+import { PlayIcon, PauseIcon, ArrowPathIcon, Cog6ToothIcon } from './IconComponents';
 import useUserData from '../hooks/useUserData';
-import { useNotification } from '../contexts/NotificationContext'; 
+import { useNotification } from '../contexts/NotificationContext';
 
 const POMODOROS_UNTIL_LONG_BREAK = 4;
 const LOCAL_STORAGE_POMODORO_STATE_KEY = 'learnixusPomodoroState';
 
 interface PomodoroSettings {
-  workDuration: number; // in minutes
-  shortBreakDuration: number; // in minutes
-  longBreakDuration: number; // in minutes
+  workDuration: number; 
+  shortBreakDuration: number;
+  longBreakDuration: number;
 }
 
-interface PomodoroStateForMiniTimer extends PomodoroSettings {
-  timeLeft: number; // in seconds
+interface PomodoroStateFromStorage {
+  timeLeft: number;
   isActive: boolean;
   mode: TimerMode;
   pomodoroCount: number;
-  theme: 'light' | 'dark';
 }
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
@@ -29,12 +26,12 @@ type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 interface PomodoroTimerProps {
   isDashboardActive: boolean;
   userName: string;
-  onLogPomodoroActivity: (durationInMinutes: number) => void; 
+  onLogPomodoroActivity: (durationInMinutes: number) => void;
 }
 
 const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userName, onLogPomodoroActivity }) => {
   const { theme } = useTheme();
-  const { addNotification } = useNotification(); 
+  const { addNotification } = useNotification();
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
 
   const [settings, setSettings] = useUserData<PomodoroSettings>('learnixusPomodoroSettings', {
@@ -43,10 +40,24 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
     longBreakDuration: 15,
   });
 
-  const [timeLeft, setTimeLeft] = useState(settings.workDuration * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [mode, setMode] = useState<TimerMode>('work');
-  const [pomodoroCount, setPomodoroCount] = useState(0);
+  const [initialState] = useState(() => {
+    const savedStateRaw = localStorage.getItem(LOCAL_STORAGE_POMODORO_STATE_KEY);
+    if (savedStateRaw) {
+      try {
+        return JSON.parse(savedStateRaw) as PomodoroStateFromStorage;
+      } catch (error) {
+        console.error("Error parsing saved pomodoro state:", error);
+        return null;
+      }
+    }
+    return null;
+  });
+
+  const [timeLeft, setTimeLeft] = useState(initialState?.timeLeft ?? settings.workDuration * 60);
+  const [isActive, setIsActive] = useState(initialState?.isActive ?? false);
+  const [mode, setMode] = useState<TimerMode>(initialState?.mode ?? 'work');
+  const [pomodoroCount, setPomodoroCount] = useState(initialState?.pomodoroCount ?? 0);
+
   const [showSettings, setShowSettings] = useState(false);
   const [inputValues, setInputValues] = useState({
     workDuration: String(settings.workDuration),
@@ -62,18 +73,24 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   const miniTimerWindowRef = useRef<Window | null>(null);
   const originalDocTitleRef = useRef<string>(document.title);
 
+  useEffect(() => {
+    if (!initialState && !isActive) {
+      if (mode === 'work') setTimeLeft(settings.workDuration * 60);
+      else if (mode === 'shortBreak') setTimeLeft(settings.shortBreakDuration * 60);
+      else if (mode === 'longBreak') setTimeLeft(settings.longBreakDuration * 60);
+    }
+  }, [settings, initialState, isActive, mode]);
+
   const updateTimerStateInLocalStorage = useCallback(() => {
-    const stateForMiniTimer: PomodoroStateForMiniTimer = {
-      ...settings,
+    const stateToSave: PomodoroStateFromStorage = {
       timeLeft,
       isActive,
       mode,
       pomodoroCount,
-      theme: theme === 'light' || theme === 'dark' ? theme : 'dark',
     };
-    localStorage.setItem(LOCAL_STORAGE_POMODORO_STATE_KEY, JSON.stringify(stateForMiniTimer));
-  }, [settings, timeLeft, isActive, mode, pomodoroCount, theme]);
-  
+    localStorage.setItem(LOCAL_STORAGE_POMODORO_STATE_KEY, JSON.stringify(stateToSave));
+  }, [timeLeft, isActive, mode, pomodoroCount]);
+
   const resetTimer = useCallback((newMode?: TimerMode, resetCount = false) => {
     setIsActive(false);
     const targetMode = newMode || mode;
@@ -97,12 +114,11 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
     setMode(targetMode);
   }, [mode, settings]);
 
-
   useEffect(() => {
     originalDocTitleRef.current = document.title;
     return () => {
-      document.title = originalDocTitleRef.current; 
-       if (miniTimerWindowRef.current && !miniTimerWindowRef.current.closed) {
+      document.title = originalDocTitleRef.current;
+      if (miniTimerWindowRef.current && !miniTimerWindowRef.current.closed) {
         miniTimerWindowRef.current.close();
       }
     };
@@ -116,23 +132,22 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
       interval = window.setInterval(() => {
         setTimeLeft((prevTime) => prevTime - 1);
       }, 1000);
-      updateTimerStateInLocalStorage();
     } else if (isActive && timeLeft === 0) {
       document.title = `Finished! - ${modeText(mode)} - ${APP_NAME}`;
-      setIsActive(false); 
-      
+      setIsActive(false);
+
       let newPomodoroCount = pomodoroCount;
       if (mode === 'work') {
         newPomodoroCount = pomodoroCount + 1;
         setPomodoroCount(newPomodoroCount);
-        onLogPomodoroActivity(settings.workDuration); 
+        onLogPomodoroActivity(settings.workDuration);
         addNotification(`🎉 Great focus, ${userName || 'Learner'}! Time for a well-deserved break. 🎉`, 'success', 7000);
         if (newPomodoroCount % POMODOROS_UNTIL_LONG_BREAK === 0) {
           resetTimer('longBreak');
         } else {
           resetTimer('shortBreak');
         }
-      } else { 
+      } else {
         addNotification(`🧘 Break's over, ${userName || 'Learner'}! Ready for the next focus session?`, 'info', 7000);
         resetTimer('work');
       }
@@ -142,54 +157,17 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
           icon: '/logo_learnixus_192.png'
         });
       }
-      updateTimerStateInLocalStorage(); 
-    } else if (!isActive) {
-      if(document.title !== originalDocTitleRef.current) document.title = originalDocTitleRef.current;
-      updateTimerStateInLocalStorage(); 
     }
+
+    updateTimerStateInLocalStorage();
 
     return () => {
       if (interval) clearInterval(interval);
     };
   }, [isActive, timeLeft, mode, pomodoroCount, resetTimer, updateTimerStateInLocalStorage, userName, addNotification, onLogPomodoroActivity, settings.workDuration]);
-  
-  useEffect(() => {
-    const handleWindowBlur = () => {
-      if (isActive && (!miniTimerWindowRef.current || miniTimerWindowRef.current.closed)) {
-        updateTimerStateInLocalStorage(); 
-        miniTimerWindowRef.current = window.open(
-          '/mini-timer.html', 
-          'LearnixusMiniTimer', 
-          'width=280,height=180,resizable=yes,scrollbars=no,toolbar=no,menubar=no,location=no,status=no'
-        );
-      }
-    };
-
-    const handleWindowFocus = () => {
-      if (miniTimerWindowRef.current && !miniTimerWindowRef.current.closed) {
-        miniTimerWindowRef.current.close();
-        miniTimerWindowRef.current = null;
-      }
-    };
-
-    window.addEventListener('blur', handleWindowBlur);
-    window.addEventListener('focus', handleWindowFocus);
-    return () => {
-      window.removeEventListener('blur', handleWindowBlur);
-      window.removeEventListener('focus', handleWindowFocus);
-    };
-  }, [isActive, updateTimerStateInLocalStorage]);
-  
-  useEffect(() => {
-    if (!isActive && miniTimerWindowRef.current && !miniTimerWindowRef.current.closed) {
-      miniTimerWindowRef.current.close();
-      miniTimerWindowRef.current = null;
-    }
-  }, [isActive]);
-
 
   const toggleTimer = () => {
-     if (!isActive && Notification.permission === "default") {
+    if (!isActive && Notification.permission === "default") {
       Notification.requestPermission();
     }
     setIsActive(!isActive);
@@ -237,7 +215,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
       }
     }
   };
-  
+
   const timerBgClass = theme === 'light' ? 'bg-white' : theme === 'dark' ? 'bg-slate-800' : 'bg-gray-900';
   const timerBorderClass = theme === 'light' ? 'border-slate-200/90' : theme === 'dark' ? 'border-slate-700/70' : 'border-gray-800/70';
   const titleColorClass = theme === 'light' ? `text-${accentColorName}-600` : `text-${accentColorName}-400`;
@@ -263,7 +241,6 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   }
 
   if (!isDashboardActive && isActive) {
-    // Mini-timer for when dashboard is not active but timer is running
     return (
       <div 
         className={`fixed bottom-5 right-5 p-3.5 rounded-xl shadow-2xl ${timerBgClass} border ${timerBorderClass} z-[70] w-52 text-center transition-all duration-300 animate-fadeIn`}
