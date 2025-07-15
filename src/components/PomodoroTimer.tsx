@@ -74,6 +74,22 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   const originalDocTitleRef = useRef<string>(document.title);
 
   useEffect(() => {
+    setInputValues({
+        workDuration: String(settings.workDuration),
+        shortBreakDuration: String(settings.shortBreakDuration),
+        longBreakDuration: String(settings.longBreakDuration),
+    });
+  }, [settings]);
+
+  useEffect(() => {
+    if (!initialState && !isActive) {
+      if (mode === 'work') setTimeLeft(settings.workDuration * 60);
+      else if (mode === 'shortBreak') setTimeLeft(settings.shortBreakDuration * 60);
+      else if (mode === 'longBreak') setTimeLeft(settings.longBreakDuration * 60);
+    }
+  }, [settings, initialState, isActive, mode]);
+
+  useEffect(() => {
     if (!initialState && !isActive) {
       if (mode === 'work') setTimeLeft(settings.workDuration * 60);
       else if (mode === 'shortBreak') setTimeLeft(settings.shortBreakDuration * 60);
