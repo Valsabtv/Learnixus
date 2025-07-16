@@ -154,7 +154,7 @@ Example for good score: "Excellent work on this quiz, ${userName || 'learner'}! 
 Example for struggle: "Good effort for taking on the quiz for ${currentQuizData.chapterName}, ${userName || 'learner'}! This material can be challenging. Revisiting the main ideas of the chapter might be helpful. Remember, every quiz is a learning opportunity!"
 `;
         const feedbackResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash-preview-04-17',
+            model: 'gemini-1.5-flash-latest',
             contents: overallFeedbackPrompt,
         });
         setOverallFeedbackText(feedbackResponse.text);
@@ -184,7 +184,7 @@ Example for struggle: "Good effort for taking on the quiz for ${currentQuizData.
     const feedbackPromises = initialResults.map(async (result) => {
       try {
         const response = await ai.models.generateContent({
-          model: 'gemini-2.5-flash-preview-04-17',
+          model: 'gemini-1.5-flash-latest',
           contents: `Question: "${result.question}"
 Correct Answer from System (for tutor reference only, do not reveal directly unless necessary for explanation): "${result.answer}"
 Student's Answer (${userName || 'Student'}): "${result.userAnswer}"`,
