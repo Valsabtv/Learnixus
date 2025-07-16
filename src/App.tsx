@@ -1138,7 +1138,15 @@ useEffect(() => {
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
         currentName={userName}
-        onUpdateName={setUserName}
+                onUpdateName={(name) => {
+            if (name !== userName) {
+                setUserName(name);
+                setStudyStrategies([]);
+            } else {
+                setUserName(name);
+            }
+        }}
+        setStudyStrategies={setStudyStrategies}
         currentStudyLevel={userStudyLevel}
         onUpdateStudyLevel={(newLevel) => {
             setUserStudyLevel(newLevel);

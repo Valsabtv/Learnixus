@@ -19,6 +19,7 @@ interface SettingsModalProps {
   onUpdateCollege: (collegeName: string) => void;
   currentExamInfo: ExamPreparationInfo | null;
   onUpdateExamInfo: (examInfo: ExamPreparationInfo) => void;
+  setStudyStrategies: React.Dispatch<React.SetStateAction<any[]>>;
 }
 
 const studyLevelsNotRequiringExamQuestion = [
@@ -37,6 +38,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateCollege,
   currentExamInfo,
   onUpdateExamInfo,
+  setStudyStrategies,
 }) => {
   const { theme, setTheme } = useTheme();
   const session = useSession();
@@ -179,6 +181,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
 
         onUpdateName(nameInput.trim());
+        setStudyStrategies([]);
         setNameSavedMessage(true);
         setTimeout(() => setNameSavedMessage(false), 2000);
       } catch (error: any) {
