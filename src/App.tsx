@@ -121,6 +121,7 @@ const App: React.FC = () => {
   const [lastFeelingCheckDate, setLastFeelingCheckDate] = useUserData<string | null>('learnixus-lastFeelingCheckDate', null);
   const [showFarewellPopup, setShowFarewellPopup] = useState(false);
   const initialAuthCheckCompleted = useRef(false);
+  const [hasShownApiKeyWarning, setHasShownApiKeyWarning] = useState(false);
 
 
   const ai = useMemo(() => {
@@ -135,6 +136,13 @@ const App: React.FC = () => {
       return null;
     }
   }, []);
+
+  useEffect(() => {
+    if (!ai && !hasShownApiKeyWarning) {
+      addNotification("AI features are currently unavailable. Please ensure your API key is valid.", 'error');
+      setHasShownApiKeyWarning(true);
+    }
+  }, [ai, hasShownApiKeyWarning, addNotification]);
 
   const updateSubjectInteraction = useCallback((subjectId: string) => {
     setSubjects(prevSubjects =>
@@ -252,7 +260,10 @@ const App: React.FC = () => {
       let defaultStrategyText = `${userName || 'Learner'}, try the Feynman Technique: explain a concept in simple terms as if teaching it to someone else.`;
       if (err instanceof Error && (err.message.includes("API key not valid") || err.message.includes("API_KEY_INVALID"))) {
         defaultStrategyText = `${userName || 'Learner'}, AI features are currently unavailable. You can still try the Feynman Technique.`;
-         addNotification("Could not fetch AI study strategies: API key issue.", 'warning');
+        if (!hasShownApiKeyWarning) {
+          addNotification("Could not fetch AI study strategies: API key issue.", 'warning');
+          setHasShownApiKeyWarning(true);
+        }
       } else {
          addNotification("Could not fetch AI study strategies. Using defaults.", 'warning');
       }
@@ -536,6 +547,10 @@ const App: React.FC = () => {
       let errorMsg = "An error occurred while generating the quiz. Please try again later.";
       if (err instanceof Error && (err.message.includes("API key not valid") || err.message.includes("API_KEY_INVALID"))) {
          errorMsg = "AI features are currently unavailable. The API key is invalid or missing.";
+         if (!hasShownApiKeyWarning) {
+          addNotification(errorMsg, 'error');
+          setHasShownApiKeyWarning(true);
+         }
       }
       setQuizError(errorMsg);
       addNotification(errorMsg, 'error');
@@ -610,7 +625,10 @@ const App: React.FC = () => {
   
   const handleOpenAskQuestionModal = useCallback((subjectId: string, chapterId: string, chapterName: string, subjectName: string) => {
     if (!ai) {
-        addNotification("AI features for asking questions are currently unavailable.", 'warning');
+        if (!hasShownApiKeyWarning) {
+            addNotification("AI features for asking questions are currently unavailable.", 'warning');
+            setHasShownApiKeyWarning(true);
+        }
         return;
     }
     setActiveChapterForQuestion({ subjectId, chapterId, chapterName, subjectName });
@@ -831,6 +849,10 @@ useEffect(() => {
       let errorMsg = "Sorry, I couldn't process that right now.";
       if (err instanceof Error && (err.message.includes("API key not valid") || err.message.includes("API_KEY_INVALID"))) {
          errorMsg = "AI interaction failed: API key issue.";
+         if (!hasShownApiKeyWarning) {
+          addNotification(errorMsg, 'error');
+          setHasShownApiKeyWarning(true);
+         }
       }
       aiResponseHandler(null, errorMsg);
     }
