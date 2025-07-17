@@ -196,7 +196,7 @@ const InitialSetupPage: React.FC<InitialSetupPageProps> = ({
 
   const { error: updateError } = await supabase
     .from("profiles")
-    .update({ username: userNameInput.trim() })
+    .upsert({ id: user.id, username: userNameInput.trim(), setup_complete: true })
     .eq("id", user.id);
 
   if (updateError) {

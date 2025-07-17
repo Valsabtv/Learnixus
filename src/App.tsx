@@ -486,7 +486,7 @@ const App: React.FC = () => {
     updateSubjectInteraction(subjectId);
 
     try {
-      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${userStudyLevel}" level,\n        generate ${numQuestions} distinct questions.\n        The questions should start relatively easy for the "${userStudyLevel}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
+      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${userStudyLevel}" level,\n        generate ${numQuestions} distinct questions.\n        The questions should start relatively easy for the "${userStudyLevel}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer. The answer should be one line at maximum, concise, and factual, avoiding any proofs, historical context, or lengthy explanations.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
       
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-1.5-flash-latest',
@@ -735,7 +735,7 @@ useEffect(() => {
       if (user) {
         const { data: profile, error } = await supabase
           .from('profiles')
-          .select('username')
+          .select('username, setup_complete')
           .eq('id', user.id)
           .single();
 
@@ -748,15 +748,19 @@ useEffect(() => {
         
         setIsAuthenticated(true);
 
-        if (profile && profile.username) {
+        if (profile && profile.username && profile.setup_complete) {
           setUserName(profile.username);
           setHasCompletedInitialSetup(true);
           if (isInitialCall) {
-            setShowOpeningPage(true);
-            setAppContentVisible(false);
+            setShowOpeningPage(false); // Setup complete, no need to show opening page
+            setAppContentVisible(true);
           }
         } else {
           setHasCompletedInitialSetup(false);
+          if (isInitialCall) {
+            setShowOpeningPage(true); // Setup not complete, show opening page
+            setAppContentVisible(false);
+          }
         }
       } else {
         setIsAuthenticated(false);
