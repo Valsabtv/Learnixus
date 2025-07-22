@@ -921,15 +921,35 @@ useEffect(() => {
       <>
         <GlobalNotificationDisplay />
         <InitialSetupPage
-            onSetupComplete={(name, level, college, examInfo) => { 
-                setUserName(name);
-                setUserStudyLevel(level);
-                setSelectedCollege(college || '');
-                setExamPreparationInfo(examInfo); 
-                setHasCompletedInitialSetup(true);
-                addNotification(`Welcome, ${name}! Your learning space is ready.`, 'success');
-                setShowOpeningPage(true); 
-                setAppContentVisible(false);
+            onSetupComplete={async (name, level, college, examInfo) => {
+                const { data: { user } } = await supabase.auth.getUser();
+                if (!user) {
+                    addNotification('Authentication error. Please try logging in again.', 'error');
+                    return;
+                }
+
+                // Save the new user's profile to the database
+                const { error } = await supabase
+                    .from('profiles')
+                    .upsert({ 
+                        id: user.id, 
+                        username: name, 
+                        updated_at: new Date().toISOString() 
+                    });
+
+                if (error) {
+                    addNotification(`Error saving profile: ${error.message}`, 'error');
+                } else {
+                    // On successful save, update the local state and proceed
+                    setUserName(name);
+                    setUserStudyLevel(level);
+                    setSelectedCollege(college || '');
+                    setExamPreparationInfo(examInfo);
+                    setHasCompletedInitialSetup(true);
+                    addNotification(`Welcome, ${name}! Your learning space is ready.`, 'success');
+                    setShowOpeningPage(true);
+                    setAppContentVisible(false);
+                }
             }}
             currentName={userName}
             currentLevel={userStudyLevel}
