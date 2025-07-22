@@ -933,8 +933,7 @@ useEffect(() => {
                     .from('profiles')
                     .upsert({ 
                         id: user.id, 
-                        username: name, 
-                        updated_at: new Date().toISOString() 
+                        username: name
                     });
 
                 if (error) {
