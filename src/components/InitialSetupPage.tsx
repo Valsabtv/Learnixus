@@ -196,7 +196,14 @@ const InitialSetupPage: React.FC<InitialSetupPageProps> = ({
 
   const { error: updateError } = await supabase
     .from("profiles")
-    .upsert({ id: user.id, username: userNameInput.trim(), setup_complete: true })
+    .upsert({ 
+      id: user.id, 
+      username: userNameInput.trim(), 
+      setup_complete: true,
+      study_level: selectedLevel,
+      college: finalSelectedCollege || '',
+      exam_info: examInfoToSave
+    })
     .eq("id", user.id);
 
   if (updateError) {

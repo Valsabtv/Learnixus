@@ -167,64 +167,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return groups;
   }, [examSearchTerm]);
 
-  const handleSaveName = async () => {
-    if (nameInput.trim() && user) {
-      try {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ username: nameInput.trim() })
-          .eq('id', user.id);
-
-        if (error) {
-          console.error("Error updating name:", error.message);
-          return;
-        }
-
-        onUpdateName(nameInput.trim());
-        setStudyStrategies([]);
-        setNameSavedMessage(true);
-        setTimeout(() => setNameSavedMessage(false), 2000);
-      } catch (error: any) {
-        console.error("Error updating name:", error.message);
-      }
-    }
-  };
-
-  const handleCollegeSelection = (college: string) => {
-    setSelectedCollegeState(college);
-    setCollegeSearchTerm(college); // Update search term to selected college
-    setIsCollegeDropdownOpen(false);
-    // onUpdateCollege(college); // Defer to save all settings
-  };
-
-  const handleIsWellKnownChange = (value: 'yes' | 'no') => {
-      setIsWellKnownCollege(value);
-      if (value === 'no') {
-          setSelectedCollegeState(OTHER_COLLEGE_PLACEHOLDER);
-          setCollegeSearchTerm(''); // Clear search term if "No"
-          // onUpdateCollege(OTHER_COLLEGE_PLACEHOLDER); // Defer
-      } else {
-          if (selectedCollegeState === OTHER_COLLEGE_PLACEHOLDER) {
-            setSelectedCollegeState('');
-            // onUpdateCollege(''); // Defer
-          }
-      }
-  };
-
-  const handleSaveAllSettings = () => {
-    // Name is saved separately with its own button
-    onUpdateStudyLevel(studyLevelInput);
-
-    if (isCollegeLevel && isWellKnownCollege === 'yes' && selectedCollegeState) {
-        onUpdateCollege(selectedCollegeState);
-    } else if (isCollegeLevel && isWellKnownCollege === 'no') {
-        onUpdateCollege(OTHER_COLLEGE_PLACEHOLDER);
-    } else if (!isCollegeLevel) {
-        onUpdateCollege('');
-    } else if (isCollegeLevel && isWellKnownCollege === 'yes' && !selectedCollegeState) {
-        onUpdateCollege(''); // Case where "yes" but nothing selected
-    }
-
+  const handleSaveAllSettings = async () => {
+    if (!user) return;
 
     let newExamInfo: ExamPreparationInfo = { goalType: 'none' };
     if (shouldShowExamSettings) {
@@ -242,9 +186,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 };
             }
         }
-    } // If not shouldShowExamSettings, it remains 'none'
-    onUpdateExamInfo(newExamInfo);
-    onClose();
+    }
+
+    const updates = {
+      username: nameInput.trim(),
+      study_level: studyLevelInput,
+      college: isCollegeLevel ? (isWellKnownCollege === 'yes' ? selectedCollegeState : OTHER_COLLEGE_PLACEHOLDER) : '',
+      exam_info: newExamInfo,
+    };
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+
+      if (error) {
+        console.error("Error updating profile:", error.message);
+        return;
+      }
+
+      onUpdateName(updates.username);
+      onUpdateStudyLevel(updates.study_level);
+      onUpdateCollege(updates.college);
+      onUpdateExamInfo(updates.exam_info);
+      setStudyStrategies([]);
+      onClose();
+    } catch (error: any) {
+      console.error("Error updating profile:", error.message);
+    }
   };
 
 
@@ -304,9 +274,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className={`flex-grow border ${inputBg} ${inputTextColor} rounded-lg p-3 focus:ring-2 focus:outline-none transition-colors duration-200 ease-in-out shadow-sm text-sm`}
                 />
                 <button
-                  onClick={handleSaveName}
-                  className={`${secondaryButtonBg} font-semibold py-2.5 px-3.5 rounded-md text-sm shadow-sm hover:opacity-90 focus:outline-none focus:ring-1 ${secondaryButtonFocusRing} focus:ring-offset-1 ${theme === 'light' ? 'focus:ring-offset-slate-50' : 'focus:ring-offset-slate-700/50'}`}
-                >
+                  onClick={handleSaveAllSettings}
+                  className={`${secondaryButtonBg} font-semibold py-2.5 px-3.5 rounded-md text-sm shadow-sm hover:opacity-90 focus:outline-none focus:ring-1 ${secondaryButtonFocusRing} focus:ring-offset-1 ${theme === 'light' ? 'focus:ring-offset-slate-50' : 'focus:ring-offset-slate-700/50'}`}>
                   Save
                 </button>
               </div>

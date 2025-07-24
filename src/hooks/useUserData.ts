@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
 import { useSession } from '@supabase/auth-helpers-react';
+import useDebounce from './useDebounce';
 
 type UseUserDataReturn<T> = [T, React.Dispatch<React.SetStateAction<T>>, boolean];
 
@@ -10,8 +11,7 @@ function useUserData<T>(key: string, initialValue: T): UseUserDataReturn<T> {
 
   const [value, setValue] = useState<T>(initialValue);
   const [loading, setLoading] = useState(true);
-
-  const isInitialMount = useRef(true);
+  const debouncedValue = useDebounce(value, 500);
 
   useEffect(() => {
     if (!user) {
@@ -39,16 +39,10 @@ function useUserData<T>(key: string, initialValue: T): UseUserDataReturn<T> {
             setValue(row.data);
           } else {
             setValue(initialValue);
-            const { error: insertError } = await supabase
-              .from('lernixus_data')
-              .upsert([{ user_id: user.id, key, data: initialValue }], { onConflict: 'user_id,key' });
-            if (insertError) {
-              console.error(`Error inserting default user data for key "${key}":`, insertError.message);
-            }
           }
         }
       } catch (error: any) {
-        console.error(`Error fetching/inserting user data for key "${key}":`, error.message);
+        console.error(`Error fetching user data for key "${key}":`, error.message);
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -64,11 +58,6 @@ function useUserData<T>(key: string, initialValue: T): UseUserDataReturn<T> {
   }, [key, user?.id]);
 
   useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
-    }
-
     if (!user || loading) {
       return;
     }
@@ -77,7 +66,7 @@ function useUserData<T>(key: string, initialValue: T): UseUserDataReturn<T> {
       try {
         const { error } = await supabase
           .from('lernixus_data')
-          .upsert([{ user_id: user.id, key, data: value }], { onConflict: 'user_id,key' });
+          .upsert([{ user_id: user.id, key, data: debouncedValue }], { onConflict: 'user_id,key' });
 
         if (error) {
           console.error(`Error saving user data for key "${key}":`, error.message);
@@ -88,7 +77,7 @@ function useUserData<T>(key: string, initialValue: T): UseUserDataReturn<T> {
     };
 
     saveData();
-  }, [value]);
+  }, [debouncedValue]);
 
   return [value, setValue, loading];
 }

@@ -30,8 +30,16 @@ import FeelingCheckModal from './components/FeelingCheckModal';
 import FarewellPopup from './components/FarewellPopup';
 import { supabase } from '../supabaseClient'; // Adjust path if needed
 import VideoPlayer from './components/VideoPlayer';
+import { useAuth } from './hooks/useAuth';
 import useUserData from './hooks/useUserData';
+
+import Dashboard from './views/Dashboard';
+import Subjects from './views/Subjects';
+import Notes from './views/Notes';
+import ChapterContent from './views/ChapterContent';
+import ExamPrep from './views/ExamPrep';
 import { BookOpenIcon } from './components/IconComponents';
+
 
 
 interface ConfirmationModalConfig {
@@ -63,22 +71,31 @@ const getTodayDateString = (): string => new Date().toISOString().split('T')[0];
 
 
 const App: React.FC = () => {
+  const { 
+    isSessionLoading, 
+    isAuthenticated, 
+    authLoading, 
+    authError,
+    hasCompletedInitialSetup,
+    userName,
+    handleSocialLogin,
+    requestLogout,
+    handleLogout,
+    setHasCompletedInitialSetup,
+    setUserName,
+    userStudyLevel,
+    selectedCollege,
+    examPreparationInfo,
+    setAuthError 
+  } = useAuth();
+
   const [subjects, setSubjects] = useUserData<Subject[]>('learnixus-subjects', []);
   const [isAddSubjectModalOpen, setIsAddSubjectModalOpen] = useState(false);
   const [isAddChapterModalOpen, setIsAddChapterModalOpen] = useState(false);
   const [currentSubjectIdForChapter, setCurrentSubjectIdForChapter] = useState<string | null>(null);
   const [currentSubjectNameForChapter, setCurrentSubjectNameForChapter] = useState<string | null>(null);
 
-  const [isSessionLoading, setIsSessionLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [authLoading, setAuthLoading] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  const [hasCompletedInitialSetup, setHasCompletedInitialSetup] = useState(false);
-  const [userStudyLevel, setUserStudyLevel] = useUserData<string>('learnixus-userStudyLevel', '');
-  const [selectedCollege, setSelectedCollege] = useUserData<string>('learnixus-selectedCollege', '');
-  const [userName, setUserName] = useUserData<string>('learnixus-userName', '');
-  const [examPreparationInfo, setExamPreparationInfo] = useUserData<ExamPreparationInfo | null>('learnixus-examPrepInfo', null);
+  
   const [examActivities, setExamActivities] = useUserData<ExamActivity[]>('learnixus-examActivities', []);
 
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
@@ -464,20 +481,21 @@ const App: React.FC = () => {
     );
   }, [setSubjects]);
 
-  const handleGenerateQuiz = useCallback(async (subjectId: string, chapterId: string, chapterName: string, subjectName: string, numQuestions?: number) => {
+  const handleGenerateQuiz = useCallback(async (subjectId: string, chapterId: string, chapterName: string, subjectName: string, numQuestions?: number, currentUserStudyLevel?: string) => {
+    const currentStudyLevelToUse = currentUserStudyLevel || "General";
     if (!ai) {
         setQuizError("AI features are currently unavailable (AI client not initialized). Please check API Key setup.");
         setIsQuizModalOpen(true);
         setQuizLoading(false);
-        setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: userStudyLevel || "General", questions: [] });
+        setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: currentStudyLevelToUse, questions: [] });
         addNotification("Quiz generation failed: AI client not available.", 'error');
         return;
     }
-    if (!userStudyLevel) {
+    if (!currentUserStudyLevel) {
       setQuizError("Please set your study level in settings before generating a quiz.");
       setIsQuizModalOpen(true);
       setQuizLoading(false);
-      setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: userStudyLevel || "General", questions: [] });
+      setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: currentStudyLevelToUse, questions: [] });
       addNotification("Please set your study level in settings to generate a quiz.", 'warning');
       return;
     }
@@ -497,7 +515,9 @@ const App: React.FC = () => {
     updateSubjectInteraction(subjectId);
 
     try {
-      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${userStudyLevel}" level,\n        generate ${numQuestions} distinct questions.\n        The questions should start relatively easy for the "${userStudyLevel}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer. The answer should be one line at maximum, concise, and factual, avoiding any proofs, historical context, or lengthy explanations.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
+      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${currentStudyLevelToUse}" level,
+        generate ${numQuestions} distinct questions.
+        The questions should start relatively easy for the "${currentStudyLevelToUse}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer. The answer should be one line at maximum, concise, and factual, avoiding any proofs, historical context, or lengthy explanations.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
       
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-1.5-flash-latest',
@@ -706,113 +726,7 @@ const App: React.FC = () => {
     addNotification('Pomodoro session logged!', 'success');
   }, [setExamActivities, addNotification]);
 
-  const handleSocialLogin = useCallback(async (provider: 'google' | 'github') => {
-  setAuthLoading(true);
-  const { error } = await supabase.auth.signInWithOAuth({
-    provider,
-    options: {
-      redirectTo: window.location.origin, // 👈 This must match the Authorized URL
-    },
-  });
-
-  if (error) {
-    setAuthError(error.message);
-  }
-  setAuthLoading(false);
-}, []);
-
-
-  const requestLogout = useCallback(() => {
-  setShowFarewellPopup(true);
-}, []);
-
-const handleLogout = useCallback(async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error("Logout error:", error.message);
-    addNotification("Logout failed.", "error");
-    return;
-  }
-
-  // Cleanup on logout
-  localStorage.removeItem('lernixus_profile'); // Clear saved profile
-  setIsAuthenticated(false);
-  setAppContentVisible(false);
-  setShowFarewellPopup(false);
-
-  addNotification("Logged out successfully.", "success");
-}, [addNotification, setIsAuthenticated]);
-
-
-useEffect(() => {
-    setIsSessionLoading(true);
-
-    const handleAuthChange = async (session: any, isInitialCall: boolean) => {
-      const user = session?.user;
-
-      if (user) {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('username, setup_complete')
-          .eq('id', user.id)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error("Error fetching profile:", error);
-          addNotification("Error loading your profile. Please try again.", "error");
-          await supabase.auth.signOut();
-          return;
-        }
-        
-        setIsAuthenticated(true);
-
-        if (profile && profile.username && profile.setup_complete) {
-          setUserName(profile.username);
-          setHasCompletedInitialSetup(true);
-          if (isInitialCall) {
-            setShowOpeningPage(false); // Setup complete, no need to show opening page
-            setAppContentVisible(true);
-          }
-        } else {
-          setHasCompletedInitialSetup(false);
-          if (isInitialCall) {
-            setShowOpeningPage(true); // Setup not complete, show opening page
-            setAppContentVisible(false);
-          }
-        }
-      } else {
-        setIsAuthenticated(false);
-        setHasCompletedInitialSetup(false);
-        setUserName('');
-        setUserStudyLevel('');
-        setSelectedCollege('');
-        setSubjects([]);
-        setExamPreparationInfo(null);
-        setExamActivities([]);
-        setGlobalNotes('');
-        initialAuthCheckCompleted.current = false; // Reset for next login
-      }
-      
-      setIsSessionLoading(false);
-    };
-
-    if (!initialAuthCheckCompleted.current) {
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            handleAuthChange(session, true);
-            initialAuthCheckCompleted.current = true;
-        });
-    }
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
-        if (initialAuthCheckCompleted.current) { // Only run listener after initial check
-            handleAuthChange(session, false);
-        }
-    });
-
-    return () => {
-      authListener?.subscription.unsubscribe();
-    };
-  }, [addNotification, setUserName, setUserStudyLevel, setSelectedCollege, setSubjects, setExamPreparationInfo, setExamActivities, setGlobalNotes]);
+  
 
 
 
@@ -937,7 +851,11 @@ useEffect(() => {
                     });
 
                 if (error) {
-                    addNotification(`Error saving profile: ${error.message}`, 'error');
+                    if (error.code === '23505') {
+                        addNotification('That username is already taken. Please choose a different one.', 'error');
+                    } else {
+                        addNotification(`Error saving profile: ${error.message}`, 'error');
+                    }
                 } else {
                     // On successful save, update the local state and proceed
                     setUserName(name);
@@ -984,7 +902,7 @@ useEffect(() => {
         userStudyLevel={userStudyLevel}
         onOpenSettingsModal={() => setIsSettingsModalOpen(true)}
         activeChapterContentInfo={activeChapterContentInfo}
-        onLogout={requestLogout}
+        onLogout={handleLogout}
       >
         <PomodoroTimer 
             isDashboardActive={activeView === 'dashboard'} 
@@ -993,87 +911,63 @@ useEffect(() => {
         />
 
         {activeView === 'dashboard' && (
-          <div className={`space-y-6 sm:space-y-8 ${mainContentPadding}`}>
-            {dailyQuote && (
-                 <section 
-                  aria-labelledby="daily-motivation-title" 
-                  className={`p-5 sm:p-6 rounded-2xl shadow-xl hover:shadow-2xl ${theme === 'light' ? 'bg-white' : 'bg-slate-800'} border-l-4 ${theme === 'light' ? `border-${lightAccentName}-${lightAccentShade}` : `border-${darkAccentName}-${darkAccentShade}`} transition-all duration-300 ease-in-out hover:scale-[1.015]`}>
-                  <h2 id="daily-motivation-title" className="sr-only">Daily Wisdom for ${userName || 'Learner'}</h2>
-                  <blockquote className="text-center sm:text-left">
-                    <p className={`text-lg sm:text-xl italic ${theme === 'light' ? 'text-slate-700' : 'text-slate-200'} leading-relaxed`}>"${dailyQuote.text}"</p>
-                    <footer className={`mt-3 text-sm font-semibold tracking-wide ${theme === 'light' ? `text-${lightAccentName}-600` : `text-${darkAccentName}-400`}`}>— ${dailyQuote.author}</footer>
-                  </blockquote>
-                </section>
-            )}
-            <StudyStrategiesSection 
-                strategies={studyStrategies} 
-                isLoading={strategiesLoading} 
-                onOpenStrategyDetail={handleOpenStrategyDetailModal}
-            />
-          </div>
+          <Dashboard
+            dailyQuote={dailyQuote}
+            userName={userName}
+            studyStrategies={studyStrategies}
+            strategiesLoading={strategiesLoading}
+            onOpenStrategyDetailModal={handleOpenStrategyDetailModal}
+            lightAccentName={lightAccentName}
+            lightAccentShade={lightAccentShade}
+            darkAccentName={darkAccentName}
+            darkAccentShade={darkAccentShade}
+          />
         )}
         {activeView === 'subjects' && (
-          <div className={`space-y-6 sm:space-y-8 ${mainContentPadding}`}>
-            {focusAreasData && focusAreasData.length > 0 && (
-                <FocusAreasDashboardSection 
-                  focusAreas={focusAreasData} 
-                  onGenerateQuiz={handleGenerateQuiz}
-                />
-              )}
-            <SubjectList
-              subjects={subjects}
-              onAddChapterClick={(subjectId, subjectName) => openAddChapterModal(subjectId, subjectName)}
-              onUpdateChapterStatus={handleUpdateChapterStatus}
-              onRequestDeleteChapter={requestDeleteChapter} 
-              onRequestDeleteSubject={requestDeleteSubject} 
-              onOpenChapterNotes={handleOpenChapterNotesModal}
-              onUpdateChapterProficiency={handleUpdateChapterProficiency}
-              onGenerateQuiz={(sId, chId, chName, subjName) => handleGenerateQuiz(sId, chId, chName, subjName)} 
-              onAskQuestion={handleOpenAskQuestionModal} 
-              onNavigateToChapterContent={handleNavigateToChapterContent} 
-              onAddSubjectFromEmptyState={openAddSubjectModal}
-            />
-          </div>
+          <Subjects
+            focusAreasData={focusAreasData}
+            handleGenerateQuiz={handleGenerateQuiz}
+            subjects={subjects}
+            openAddChapterModal={openAddChapterModal}
+            handleUpdateChapterStatus={handleUpdateChapterStatus}
+            requestDeleteChapter={requestDeleteChapter}
+            requestDeleteSubject={requestDeleteSubject}
+            handleOpenChapterNotesModal={handleOpenChapterNotesModal}
+            handleUpdateChapterProficiency={handleUpdateChapterProficiency}
+            handleOpenAskQuestionModal={handleOpenAskQuestionModal}
+            handleNavigateToChapterContent={handleNavigateToChapterContent}
+            openAddSubjectModal={openAddSubjectModal}
+          />
         )}
         {activeView === 'personalNotes' && (
-          <PersonalNotesView initialNotes={globalNotes} onSaveNotes={setGlobalNotes} />
+          <Notes
+            globalNotes={globalNotes}
+            setGlobalNotes={setGlobalNotes}
+          />
         )}
-        {activeView === 'chapterContent' && activeChapterContentInfo && ai && ( 
-          <ChapterContentView
-            subjectName={activeChapterContentInfo.subjectName}
-            chapterName={activeChapterContentInfo.chapterName}
+        {activeView === 'chapterContent' && activeChapterContentInfo && (
+          <ChapterContent
+            activeChapterContentInfo={activeChapterContentInfo}
             userStudyLevel={userStudyLevel}
             userName={userName}
             ai={ai}
-            onClose={handleCloseChapterContentView}
+            handleCloseChapterContentView={handleCloseChapterContentView}
+            lightAccentName={lightAccentName}
+            lightAccentShade={lightAccentShade}
+            darkAccentName={darkAccentName}
+            darkAccentShade={darkAccentShade}
           />
         )}
-         {activeView === 'chapterContent' && activeChapterContentInfo && !ai && ( 
-            <div className="p-6 sm:p-8 text-center">
-                <p className={`${theme === 'light' ? 'text-slate-700' : 'text-slate-200'} text-lg`}>
-                    AI features for chapter content generation are currently unavailable.
-                </p>
-                <button 
-                    onClick={handleCloseChapterContentView}
-                    className={`mt-4 py-2.5 px-5 rounded-lg shadow-md hover:shadow-lg transition-all ${theme === 'light' ? `bg-${lightAccentName}-500 hover:bg-${lightAccentName}-600 text-white` : `bg-${darkAccentName}-500 hover:bg-${darkAccentName}-600 text-white`}`}>
-                    Back to My Learning
-                </button>
-            </div>
-        )}
         {activeView === 'examPrep' && (
-            <div className={`${mainContentPadding}`}>
-                <ExamPrepView 
-                    examInfo={examPreparationInfo}
-                    activities={examActivities}
-                    userName={userName}
-                />
-            </div>
+          <ExamPrep
+            examPreparationInfo={examPreparationInfo}
+            examActivities={examActivities}
+            userName={userName}
+          />
         )}
         {activeView === 'video' && (
-            <div className={`${mainContentPadding}`}>
-                <VideoPlayer />
-            </div>
-          )}
+          <VideoPlayer />
+        )}
 
       </Layout>
 
@@ -1123,7 +1017,7 @@ useEffect(() => {
           error={quizError}
           onGenerateNewQuiz={(chapterName, subjectName, numQuestions) => {
               if (activeQuizData) { 
-                   handleGenerateQuiz(activeQuizData.subjectId, activeQuizData.chapterId, chapterName, subjectName, numQuestions);
+                   handleGenerateQuiz(activeQuizData.subjectId, activeQuizData.chapterId, chapterName, subjectName, numQuestions, userStudyLevel);
               }
           }}
           ai={ai}
