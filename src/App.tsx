@@ -872,6 +872,7 @@ const App: React.FC = () => {
             currentLevel={userStudyLevel}
             currentCollege={selectedCollege}
             currentExamInfo={examPreparationInfo} 
+            handleLogout={handleLogout}
         />
       </>
     );

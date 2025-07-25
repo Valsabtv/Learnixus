@@ -16,6 +16,7 @@ interface InitialSetupPageProps {
   currentLevel: string;
   currentCollege: string;
   currentExamInfo: ExamPreparationInfo | null; // Added prop
+  handleLogout: () => void;
 }
 
 const studyLevelsNotRequiringExamQuestion = [
@@ -28,7 +29,8 @@ const InitialSetupPage: React.FC<InitialSetupPageProps> = ({
     currentName,
     currentLevel,
     currentCollege,
-    currentExamInfo // Destructure new prop
+    currentExamInfo, // Destructure new prop
+    handleLogout
 }) => {
   const { theme } = useTheme();
   const { addNotification } = useNotification();
@@ -496,6 +498,15 @@ const InitialSetupPage: React.FC<InitialSetupPageProps> = ({
               className={`w-full ${buttonBg} text-white font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out flex items-center justify-center gap-2 text-base focus:outline-none focus:ring-2 ${buttonFocusRing} focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-${cardBg.split('-')[1]}`} hover:scale-[1.02] hover:-translate-y-0.5`}
             >
               Let's Get Started!
+            </button>
+          </div>
+          <div className="pt-3">
+            <button
+              type="button"
+              onClick={handleLogout}
+              className={`w-full bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3.5 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 ease-in-out flex items-center justify-center gap-2 text-base focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 ${theme === 'light' ? 'focus:ring-offset-white' : `focus:ring-offset-${cardBg.split('-')[1]}`} hover:scale-[1.02] hover:-translate-y-0.5`}
+            >
+              Logout
             </button>
           </div>
         </form>
