@@ -66,14 +66,14 @@ export const useAuth = () => {
 
         setIsAuthenticated(true);
 
-        if (profile && profile.username && profile.setup_complete) {
-          setUserName(profile.username);
-          setHasCompletedInitialSetup(true);
+        if (profile) {
+          setUserName(profile.username || '');
+          setHasCompletedInitialSetup(profile.setup_complete || false);
           setUserStudyLevel(profile.study_level || '');
           setSelectedCollege(profile.college || '');
           setExamPreparationInfo(profile.exam_info || null);
-          setStreak(profile.streak || 0);
         } else {
+          // This is a new user, or a user without a profile. Direct them to setup.
           setHasCompletedInitialSetup(false);
         }
       } else {
@@ -106,18 +106,20 @@ export const useAuth = () => {
     isAuthenticated,
     authLoading,
     authError,
+    setAuthError,
     hasCompletedInitialSetup,
     userName,
+    setUserName,
     userStudyLevel,
+    setUserStudyLevel,
     selectedCollege,
+    setSelectedCollege,
     examPreparationInfo,
+    setExamPreparationInfo,
+    streak,
     handleSocialLogin,
     requestLogout,
     handleLogout,
     setHasCompletedInitialSetup,
-    setUserName,
-    setUserStudyLevel,
-    setSelectedCollege,
-    streak,
   };
 };

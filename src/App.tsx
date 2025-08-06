@@ -76,17 +76,20 @@ const App: React.FC = () => {
     isAuthenticated, 
     authLoading, 
     authError,
+    setAuthError,
     hasCompletedInitialSetup,
+    setHasCompletedInitialSetup,
     userName,
+    setUserName,
+    userStudyLevel,
+    setUserStudyLevel,
+    selectedCollege,
+    setSelectedCollege,
+    examPreparationInfo,
+    setExamPreparationInfo,
     handleSocialLogin,
     requestLogout,
     handleLogout,
-    setHasCompletedInitialSetup,
-    setUserName,
-    userStudyLevel,
-    selectedCollege,
-    examPreparationInfo,
-    setAuthError 
   } = useAuth();
 
   const [subjects, setSubjects] = useUserData<Subject[]>('learnixus-subjects', []);
@@ -842,20 +845,46 @@ const App: React.FC = () => {
                     return;
                 }
 
-                // Save the new user's profile to the database
-                const { error } = await supabase
+                // Check if a profile already exists
+                const { data: existingProfile, error: fetchError } = await supabase
                     .from('profiles')
-                    .upsert({ 
-                        id: user.id, 
-                        username: name
-                    });
+                    .select('id')
+                    .eq('id', user.id)
+                    .single();
+
+                if (fetchError && fetchError.code !== 'PGRST116') { // Ignore 'No rows found' error
+                    addNotification(`Error checking profile: ${fetchError.message}`, 'error');
+                    return;
+                }
+
+                const profileData = {
+                    id: user.id,
+                    username: name,
+                    setup_complete: true,
+                    study_level: level,
+                    college: college,
+                    exam_info: examInfo
+                };
+
+                let error;
+                if (existingProfile) {
+                    // Update existing profile
+                    const { error: updateError } = await supabase
+                        .from('profiles')
+                        .update(profileData)
+                        .eq('id', user.id);
+                    error = updateError;
+                } else {
+                    // Insert new profile
+                    const { error: insertError } = await supabase
+                        .from('profiles')
+                        .insert(profileData);
+                    error = insertError;
+                }
+
 
                 if (error) {
-                    if (error.code === '23505') {
-                        addNotification('That username is already taken. Please choose a different one.', 'error');
-                    } else {
-                        addNotification(`Error saving profile: ${error.message}`, 'error');
-                    }
+                    addNotification(`Error saving profile: ${error.message}`, 'error');
                 } else {
                     // On successful save, update the local state and proceed
                     setUserName(name);

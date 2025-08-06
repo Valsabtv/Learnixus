@@ -22,7 +22,7 @@ const useStreakTracker = (): { currentStreak: number; checkAndProcessStreak: () 
         .from('profiles')
         .select('streak, last_active_date')
         .eq('id', user.id)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching streak:", error.message);
