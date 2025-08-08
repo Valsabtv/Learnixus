@@ -844,6 +844,7 @@ const App: React.FC = () => {
                     addNotification('Authentication error. Please try logging in again.', 'error');
                     return;
                 }
+                console.log('User object from Supabase auth:', user);
 
                 // Check if a profile already exists
                 const { data: existingProfile, error: fetchError } = await supabase
@@ -860,6 +861,7 @@ const App: React.FC = () => {
                 const profileData = {
                     id: user.id,
                     username: name,
+                    email: user.email,
                     setup_complete: true,
                     study_level: level,
                     college: college,
