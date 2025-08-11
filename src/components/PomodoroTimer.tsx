@@ -72,6 +72,20 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
 
   const miniTimerWindowRef = useRef<Window | null>(null);
   const originalDocTitleRef = useRef<string>(document.title);
+  const channelRef = useRef<BroadcastChannel | null>(null);
+
+  useEffect(() => {
+    channelRef.current = new BroadcastChannel('pomodoro-timer');
+    return () => {
+      channelRef.current?.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (channelRef.current) {
+      channelRef.current.postMessage({ timeLeft, mode });
+    }
+  }, [timeLeft, mode]);
 
   useEffect(() => {
     setInputValues({
@@ -80,14 +94,6 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
         longBreakDuration: String(settings.longBreakDuration),
     });
   }, [settings]);
-
-  useEffect(() => {
-    if (!initialState && !isActive) {
-      if (mode === 'work') setTimeLeft(settings.workDuration * 60);
-      else if (mode === 'shortBreak') setTimeLeft(settings.shortBreakDuration * 60);
-      else if (mode === 'longBreak') setTimeLeft(settings.longBreakDuration * 60);
-    }
-  }, [settings, initialState, isActive, mode]);
 
   useEffect(() => {
     if (!initialState && !isActive) {
@@ -108,6 +114,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   }, [timeLeft, isActive, mode, pomodoroCount]);
 
   const resetTimer = useCallback((newMode?: TimerMode, resetCount = false) => {
+    workerRef.current?.postMessage({ command: 'reset', value: settings.workDuration * 60 });
     setIsActive(false);
     const targetMode = newMode || mode;
     if (resetCount) setPomodoroCount(0);
@@ -128,6 +135,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
     }
     setTimeLeft(newTimeLeft);
     setMode(targetMode);
+    workerRef.current?.postMessage({ command: 'reset', value: newTimeLeft });
   }, [mode, settings]);
 
   useEffect(() => {
@@ -140,51 +148,63 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
     };
   }, []);
 
+  const workerRef = useRef<Worker | null>(null);
+
   useEffect(() => {
-    let interval: number | null = null;
+    workerRef.current = new Worker(new URL('../workers/timerWorker.ts', import.meta.url), { type: 'module' });
 
-    if (isActive && timeLeft > 0) {
-      document.title = `${formatTime(timeLeft)} - ${modeText(mode)} - ${APP_NAME}`;
-      interval = window.setInterval(() => {
-        setTimeLeft((prevTime) => prevTime - 1);
-      }, 1000);
-    } else if (isActive && timeLeft === 0) {
-      document.title = `Finished! - ${modeText(mode)} - ${APP_NAME}`;
-      setIsActive(false);
-
-      let newPomodoroCount = pomodoroCount;
-      if (mode === 'work') {
-        newPomodoroCount = pomodoroCount + 1;
-        setPomodoroCount(newPomodoroCount);
-        onLogPomodoroActivity(settings.workDuration);
-        addNotification(`🎉 Great focus, ${userName || 'Learner'}! Time for a well-deserved break. 🎉`, 'success', 7000);
-        if (newPomodoroCount % POMODOROS_UNTIL_LONG_BREAK === 0) {
-          resetTimer('longBreak');
+    workerRef.current.onmessage = (e: MessageEvent) => {
+      const { type, timeLeft: newTimeLeft } = e.data;
+      if (type === 'tick') {
+        setTimeLeft(newTimeLeft);
+      } else if (type === 'done') {
+        setIsActive(false);
+        let newPomodoroCount = pomodoroCount;
+        if (mode === 'work') {
+          newPomodoroCount = pomodoroCount + 1;
+          setPomodoroCount(newPomodoroCount);
+          onLogPomodoroActivity(settings.workDuration);
+          addNotification(`🎉 Great focus, ${userName || 'Learner'}! Time for a well-deserved break. 🎉`, 'success', 7000);
+          if (newPomodoroCount % POMODOROS_UNTIL_LONG_BREAK === 0) {
+            resetTimer('longBreak');
+          } else {
+            resetTimer('shortBreak');
+          }
         } else {
-          resetTimer('shortBreak');
+          addNotification(`🧘 Break's over, ${userName || 'Learner'}! Ready for the next focus session?`, 'info', 7000);
+          resetTimer('work');
         }
-      } else {
-        addNotification(`🧘 Break's over, ${userName || 'Learner'}! Ready for the next focus session?`, 'info', 7000);
-        resetTimer('work');
+        if (Notification.permission === "granted") {
+          new Notification(APP_NAME + " Timer", {
+            body: mode === 'work' ? "Focus session ended! Time for a break." : "Break ended! Time for work.",
+            icon: '/logo_learnixus_192.png'
+          });
+        }
       }
-      if (Notification.permission === "granted") {
-        new Notification(APP_NAME + " Timer", {
-          body: mode === 'work' ? "Focus session ended! Time for a break." : "Break ended! Time for work.",
-          icon: '/logo_learnixus_192.png'
-        });
-      }
-    }
-
-    updateTimerStateInLocalStorage();
+    };
 
     return () => {
-      if (interval) clearInterval(interval);
+      workerRef.current?.terminate();
     };
-  }, [isActive, timeLeft, mode, pomodoroCount, resetTimer, updateTimerStateInLocalStorage, userName, addNotification, onLogPomodoroActivity, settings.workDuration]);
+  }, [resetTimer, mode, pomodoroCount, onLogPomodoroActivity, settings.workDuration, userName, addNotification]);
+
+  useEffect(() => {
+    if (isActive) {
+      document.title = `${formatTime(timeLeft)} - ${modeText(mode)} - ${APP_NAME}`;
+    } else {
+      document.title = originalDocTitleRef.current;
+    }
+    updateTimerStateInLocalStorage();
+  }, [timeLeft, isActive, mode, updateTimerStateInLocalStorage]);
 
   const toggleTimer = () => {
     if (!isActive && Notification.permission === "default") {
       Notification.requestPermission();
+    }
+    if (isActive) {
+      workerRef.current?.postMessage({ command: 'pause' });
+    } else {
+      workerRef.current?.postMessage({ command: 'start', value: timeLeft });
     }
     setIsActive(!isActive);
   }
@@ -229,6 +249,23 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
         else if (field === 'shortBreakDuration' && mode === 'shortBreak') setTimeLeft(numValue * 60);
         else if (field === 'longBreakDuration' && mode === 'longBreak') setTimeLeft(numValue * 60);
       }
+    }
+  };
+
+  const handleOpenMiniTimer = () => {
+    if (miniTimerWindowRef.current && !miniTimerWindowRef.current.closed) {
+      miniTimerWindowRef.current.focus();
+    } else {
+      const width = 250;
+      const height = 200;
+      const left = window.screen.width - width - 20;
+      const top = window.screen.height - height - 80;
+
+      miniTimerWindowRef.current = window.open(
+        `/mini-timer.html?theme=${theme}`,
+        'mini-timer',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
     }
   };
 
@@ -336,6 +373,13 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
         >
           <ArrowPathIcon className="w-5 h-5" />
           Reset All
+        </button>
+        <button
+          onClick={handleOpenMiniTimer}
+          className={`${buttonBaseClass} ${secondaryButtonClass} ${ringOffsetClass} w-full sm:w-auto flex items-center justify-center gap-2 hover:opacity-90`}
+          aria-label="Open mini timer"
+        >
+          Open Mini Timer
         </button>
       </div>
     </div>
