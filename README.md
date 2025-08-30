@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# Lernixus
+# Learnixus
 =======
 # Run and deploy your AI Studio app
 
