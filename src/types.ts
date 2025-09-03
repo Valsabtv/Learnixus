@@ -54,7 +54,23 @@ export interface StudyStrategy {
 }
 
 // Active view type for main application layout
-export type ActiveView = 'dashboard' | 'subjects' | 'personalNotes' | 'chapterContent' | 'examPrep' | 'video';
+export type ActiveView = 'dashboard' | 'subjects' | 'personalNotes' | 'chapterContent' | 'examPrep' | 'video' | 'dailyTasks';
+
+// Types for Daily Tasks
+export enum DailyTaskStatus {
+  Pending = 'pending',
+  Completed = 'completed',
+  Dropped = 'dropped',
+}
+
+export interface DailyTask {
+  id: string;
+  date: string; // YYYY-MM-DD
+  text: string;
+  status: DailyTaskStatus;
+  notes?: string;
+}
+
 
 // Interface for Chapter Content View
 export interface ActiveChapterContentInfo {
@@ -97,7 +113,8 @@ export type ExamActivityType =
   | 'chapter_completed' 
   | 'pomodoro_session'
   | 'chapter_content_viewed' // Added new type
-  | 'ai_question_asked';     // Added new type
+  | 'ai_question_asked'
+  | 'daily_task_completed';     // Added new type
 
 export interface ExamActivity {
   id: string;

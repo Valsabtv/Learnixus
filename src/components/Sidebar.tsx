@@ -141,6 +141,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <NavButton view="dashboard" label="Dashboard" Icon={LayoutDashboardIcon} />
         <NavButton view="subjects" label="My Learning" Icon={BookOpenIcon} />
         <NavButton view="examPrep" label="Exam Prep Hub" Icon={ClipboardDocumentCheckIcon} />
+        <NavButton view="dailyTasks" label="Daily Tasks" Icon={ClipboardDocumentCheckIcon} />
         <NavButton view="personalNotes" label="Personal Notes" Icon={DocumentTextIcon} />
         <NavButton view="video" label="Focus Mode" Icon={FireIcon} />
       </nav>

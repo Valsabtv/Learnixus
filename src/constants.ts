@@ -32,6 +32,20 @@ export const STATUS_STYLES_DARK: Record<ChapterStatus, {textColor: string, bgCol
   [ChapterStatus.Completed]: { textColor: 'text-green-400', bgColor: 'bg-green-700/60', borderColor: 'border-green-600/80', iconColor: 'text-green-500'},
 };
 
+export const TASK_STATUS_STYLES_LIGHT: Record<string, {border: string, text: string, buttonHover: string}> = {
+  pending: { border: 'border-slate-300', text: 'text-slate-600', buttonHover: 'hover:bg-slate-500/20'},
+  ongoing: { border: 'border-sky-400', text: 'text-sky-600', buttonHover: 'hover:bg-sky-500/20'},
+  completed: { border: 'border-emerald-400', text: 'text-emerald-600 line-through', buttonHover: 'hover:bg-emerald-500/20'},
+  dropped: { border: 'border-rose-400', text: 'text-rose-600 line-through', buttonHover: 'hover:bg-rose-500/20'},
+};
+
+export const TASK_STATUS_STYLES_DARK: Record<string, {border: string, text: string, buttonHover: string}> = {
+  pending: { border: 'border-slate-700', text: 'text-slate-400', buttonHover: 'hover:bg-slate-500/20'},
+  ongoing: { border: 'border-sky-600/80', text: 'text-sky-400', buttonHover: 'hover:bg-sky-500/20'},
+  completed: { border: 'border-green-600/80', text: 'text-green-400 line-through', buttonHover: 'hover:bg-green-500/20'},
+  dropped: { border: 'border-red-600/80', text: 'text-red-400 line-through', buttonHover: 'hover:bg-red-500/20'},
+};
+
 
 export const STUDY_LEVEL_OPTIONS: string[] = [
   'Primary School (Classes 1-5)',

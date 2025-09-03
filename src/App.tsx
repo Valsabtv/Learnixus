@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import useStreakTracker from './hooks/useStreakTracker';
-import { Subject, Chapter, ChapterStatus, QuizQuestion, FocusArea, StudyStrategy, ActiveView, ActiveChapterContentInfo, ExamPreparationInfo, ExamActivity, FeelingAIResponse, EasyChapterSuggestion } from './types';
+import { Subject, Chapter, ChapterStatus, QuizQuestion, FocusArea, StudyStrategy, ActiveView, ActiveChapterContentInfo, ExamPreparationInfo, ExamActivity, FeelingAIResponse, EasyChapterSuggestion, DailyTask, DailyTaskStatus } from './types';
 import { SUBJECT_COLORS, APP_NAME, LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR, OTHER_COLLEGE_PLACEHOLDER, NIRF_COLLEGES_INDIA_TOP_50, STUDY_LEVEL_OPTIONS, POPULAR_INDIAN_EXAMS,} from './constants';
 import SubjectList from './components/SubjectList';
 import Modal from './components/Modal';
@@ -38,6 +38,8 @@ import Subjects from './views/Subjects';
 import Notes from './views/Notes';
 import ChapterContent from './views/ChapterContent';
 import ExamPrep from './views/ExamPrep';
+import DailyTasksView from './views/DailyTasksView';
+import TaskNotesModal from './components/TaskNotesModal';
 import { BookOpenIcon } from './components/IconComponents';
 
 
@@ -142,6 +144,10 @@ const App: React.FC = () => {
   const [showFarewellPopup, setShowFarewellPopup] = useState(false);
   const initialAuthCheckCompleted = useRef(false);
   const [hasShownApiKeyWarning, setHasShownApiKeyWarning] = useState(false);
+
+  const [dailyTasks, setDailyTasks] = useUserData<DailyTask[]>('learnixus-dailyTasks', []);
+  const [isTaskNotesModalOpen, setIsTaskNotesModalOpen] = useState(false);
+  const [editingTaskInfo, setEditingTaskInfo] = useState<{taskId: string, taskText: string, currentNotes: string} | null>(null);
 
 
   const ai = useMemo(() => {
@@ -252,7 +258,11 @@ const App: React.FC = () => {
       }
 
 
-      const prompt = `You are an academic advisor AI.\nGenerate 3 unique, concise, and actionable study strategies for ${userName || 'Student'}, who is ${studyContextDescription}.${examContext}\nEach strategy should be 1-2 sentences long, directly addressing the student by name (e.g., "${userName || 'Learner'}, try...").\nReturn the output as a JSON array of strings.\nExample: ["${userName || 'Learner'}, try the Feynman Technique by explaining concepts in simple terms.", "To boost memory, ${userName || 'Student'}, use active recall by testing yourself regularly.", "${userName || 'Learner'}, practice spaced repetition by reviewing material at increasing intervals." ]`;
+      const prompt = `You are an academic advisor AI.
+Generate 3 unique, concise, and actionable study strategies for ${userName || 'Student'}, who is ${studyContextDescription}.${examContext}
+Each strategy should be 1-2 sentences long, directly addressing the student by name (e.g., "${userName || 'Learner'}, try...").
+Return the output as a JSON array of strings.
+Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining concepts in simple terms.", "To boost memory, ${userName || 'Student'}, use active recall by testing yourself regularly.", "${userName || 'Learner'}, practice spaced repetition by reviewing material at increasing intervals." ]`;
 
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-1.5-flash-latest',
@@ -518,9 +528,13 @@ const App: React.FC = () => {
     updateSubjectInteraction(subjectId);
 
     try {
-      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.\n        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",\n        and considering the student is at a "${currentStudyLevelToUse}" level,
+      const prompt = `\n        You are a quiz generation assistant for a student named ${userName || 'there'}.
+        Based on the chapter titled "${chapterName}" from the subject "${subjectName}",
+        and considering the student is at a "${currentStudyLevelToUse}" level,
         generate ${numQuestions} distinct questions.
-        The questions should start relatively easy for the "${currentStudyLevelToUse}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:\n          "[a, b]\\n[c, d]" or "a b\\nc d"\n          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer. The answer should be one line at maximum, concise, and factual, avoiding any proofs, historical context, or lengthy explanations.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{"question": "What is the capital of France?", "answer": "Paris."}, {"question": "Solve for x: 2x + 3 = 7", "answer": "x = 2"}, {"question": "Represent the following matrix:\\n[1, 2; 3, 4]", "answer": "A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row."}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
+        The questions should start relatively easy for the "${currentStudyLevelToUse}" level and progressively increase in difficulty, while all remaining appropriate for this study level.\n        \n        Formatting Instructions for Questions:\n        - **General**: Ensure all generated content, especially questions involving structures or multi-line elements, is formatted with appropriate line breaks (using '\\n') to be easily readable when displayed.\n        - **Mathematical Matrices**: Represent matrices using clearly separated rows. Use line breaks ('\\n') for new rows. For example, a 2x2 matrix like [[a, b], [c, d]] should be formatted in the question string as:
+          "[a, b]\\n[c, d]" or "a b\\nc d"
+          Ensure elements within a row are adequately spaced.\n        - **Chemical Compounds**: For organic compounds or complex structures, use common linear notations (like simplified structural representations where appropriate, e.g., CH3-CH2-OH for ethanol) or ensure that multi-part formulas are presented with clear spacing and line breaks if it aids readability. Avoid cramming complex structures into a single line. For example, a longer chain or a simple displayed formula should use line breaks.\n        \n        For each question, provide a concise, correct answer. The answer should be one line at maximum, concise, and factual, avoiding any proofs, historical context, or lengthy explanations.\n        Return the output as a JSON array, where each element is an object with two keys: "question" (string, formatted as per above) and "answer" (string).\n        Ensure the entire response is ONLY the JSON array string, nothing before or after.\n        Example: [{\"question\": \"What is the capital of France?\", \"answer\": \"Paris.\"}, {\"question\": \"Solve for x: 2x + 3 = 7\", \"answer\": \"x = 2\"}, {\"question\": \"Represent the following matrix:\\n[1, 2; 3, 4]\", \"answer\": \"A 2x2 matrix with 1 and 2 in the first row, and 3 and 4 in the second row.\"}]\n        If the chapter title is too vague or general to generate specific, meaningful questions according to these instructions, respond with the exact text "NOT_FOUND".\n      `;
       
       const response: GenerateContentResponse = await ai.models.generateContent({
         model: 'gemini-1.5-flash-latest',
@@ -554,7 +568,7 @@ const App: React.FC = () => {
           }
         } catch (parseError) {
           console.error("Failed to parse JSON response for quiz:", parseError, "Raw text:", rawText);
-          const errorMsg = `Sorry, I couldn't structure the quiz for "${chapterName}" correctly. The AI response was not in the expected JSON format. The raw response started with: "${rawText.substring(0, 100)}..."`;
+          const errorMsg = `Sorry, I couldn't structure the quiz for "${chapterName}" correctly. The AI response was not in the expected JSON format. The raw response started with: "${rawText.substring(0, 100)}"...`;
           setQuizError(errorMsg);
           addNotification("Quiz generation failed: AI response format error.", 'error');
           setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel, questions: [] });
@@ -729,8 +743,66 @@ const App: React.FC = () => {
     addNotification('Pomodoro session logged!', 'success');
   }, [setExamActivities, addNotification]);
 
-  
+  const handleAddTask = (taskText: string, date: string) => {
+    const newTask: DailyTask = {
+      id: crypto.randomUUID(),
+      date,
+      text: taskText,
+      status: DailyTaskStatus.Pending,
+      notes: '',
+    };
+    setDailyTasks(prev => [...prev, newTask]);
+    addNotification(`Task "${taskText}" added!`, 'success');
+  };
 
+  const handleUpdateTaskStatus = (taskId: string, status: DailyTaskStatus) => {
+    let taskText = '';
+    setDailyTasks(prev => prev.map(task => {
+      if (task.id === taskId) {
+        taskText = task.text;
+        return { ...task, status };
+      }
+      return task;
+    }));
+
+    if (status === DailyTaskStatus.Completed && taskText) {
+      const newActivity: ExamActivity = {
+        id: crypto.randomUUID(),
+        date: getTodayDateString(),
+        timestamp: Date.now(),
+        type: 'daily_task_completed',
+        description: `Completed daily task: "${taskText}".`,
+      };
+      setExamActivities(prevActivities => [...prevActivities, newActivity]);
+      addNotification(`Task "${taskText}" completed & logged!`, 'success');
+    } else {
+      addNotification(`Task status updated.`, 'info');
+    }
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    setDailyTasks(prev => prev.filter(task => task.id !== taskId));
+    addNotification(`Task deleted.`, 'info');
+  };
+
+  const handleOpenTaskNotesModal = (taskId: string) => {
+    const task = dailyTasks.find(t => t.id === taskId);
+    if (task) {
+      setEditingTaskInfo({ taskId, taskText: task.text, currentNotes: task.notes || '' });
+      setIsTaskNotesModalOpen(true);
+    }
+  };
+
+  const handleCloseTaskNotesModal = () => {
+    setIsTaskNotesModalOpen(false);
+    setEditingTaskInfo(null);
+  };
+
+  const handleSaveTaskNotes = (taskId: string, newNotes: string) => {
+    setDailyTasks(prev => prev.map(task => task.id === taskId ? { ...task, notes: newNotes } : task));
+    addNotification('Task notes saved!', 'success');
+    handleCloseTaskNotesModal();
+  };
 
 
   const handleFeelingCheckSubmit = useCallback(async (feelingText: string, aiResponseHandler: (aiRes: FeelingAIResponse | null, error?: string) => void) => {
@@ -739,7 +811,17 @@ const App: React.FC = () => {
       return;
     }
     try {
-      const prompt = `\n        You are an empathetic AI companion for a student named ${userName || 'Learner'}.\n        The student is using the ${APP_NAME} app and has shared their current feeling: "${feelingText}"\n\n        Your tasks:\n        1. Provide a short (1-2 sentences), comforting, and understanding response to the student's feeling. Address them by name.\n        2. Determine an "actionHint" based on the feeling. Possible actionHints are: "none", "suggest_easy_chapter", "take_break".\n           - "take_break": If the feeling is strongly negative (e.g., "depressed", "hopeless", "overwhelmed", "burnt out", "crisis").\n           - "suggest_easy_chapter": If the feeling is mildly or moderately negative (e.g., "stressed", "tired", "a bit down", "sad", "frustrated", "unmotivated").\n           - "none": For positive or neutral feelings, or if unsure.\n\n        Return your entire response as a single, valid JSON object with two keys: "responseText" (string) and "actionHint" (string - one of the three specified values).\n        Example 1 (mildly negative): {"responseText": "I hear you, ${userName || 'Learner'}. It's okay to feel stressed sometimes. Remember to be kind to yourself.", "actionHint": "suggest_easy_chapter"}\n        Example 2 (strongly negative): {"responseText": "It sounds like you're going through a really tough time, ${userName || 'Learner'}. Please consider taking a break and focusing on your well-being.", "actionHint": "take_break"}\n        Example 3 (positive): {"responseText": "That's great to hear, ${userName || 'Learner'}! Keep that positive energy going into your studies.", "actionHint": "none"}\n      `;
+      const prompt = `\n        You are an empathetic AI companion for a student named ${userName || 'Learner'}.
+        The student is using the ${APP_NAME} app and has shared their current feeling: "${feelingText}"\n\n        Your tasks:
+        1. Provide a short (1-2 sentences), comforting, and understanding response to the student's feeling. Address them by name.
+        2. Determine an "actionHint" based on the feeling. Possible actionHints are: "none", "suggest_easy_chapter", "take_break".
+           - "take_break": If the feeling is strongly negative (e.g., "depressed", "hopeless", "overwhelmed", "burnt out", "crisis").
+           - "suggest_easy_chapter": If the feeling is mildly or moderately negative (e.g., "stressed", "tired", "a bit down", "sad", "frustrated", "unmotivated").
+           - "none": For positive or neutral feelings, or if unsure.\n\n        Return your entire response as a single, valid JSON object with two keys: "responseText" (string) and "actionHint" (string - one of the three specified values).
+        Example 1 (mildly negative): {"responseText": "I hear you, ${userName || 'Learner'}. It's okay to feel stressed sometimes. Remember to be kind to yourself.", "actionHint": "suggest_easy_chapter"}
+        Example 2 (strongly negative): {"responseText": "It sounds like you're going through a really tough time, ${userName || 'Learner'}. Please consider taking a break and focusing on your well-being.", "actionHint": "take_break"}
+        Example 3 (positive): {"responseText": "That's great to hear, ${userName || 'Learner'}! Keep that positive energy going into your studies.", "actionHint": "none"}
+      `;
       const response = await ai.models.generateContent({
         model: 'gemini-1.5-flash-latest',
         contents: prompt,
@@ -997,6 +1079,15 @@ const App: React.FC = () => {
             userName={userName}
           />
         )}
+        {activeView === 'dailyTasks' && (
+          <DailyTasksView
+            tasks={dailyTasks}
+            onAddTask={handleAddTask}
+            onUpdateTaskStatus={handleUpdateTaskStatus}
+            onDeleteTask={handleDeleteTask}
+            onOpenNotes={handleOpenTaskNotesModal}
+          />
+        )}
         {activeView === 'video' && (
           <VideoPlayer />
         )}
@@ -1058,7 +1149,7 @@ const App: React.FC = () => {
           userName={userName}
         />
       )}
-       {isQuizModalOpen && !ai && ( 
+       {isQuizModalOpen && !ai && (
          <Modal isOpen={isQuizModalOpen} onClose={handleCloseQuizModal} title="Quiz Unavailable">
             <p className={`${theme === 'light' ? 'text-slate-700' : 'text-slate-200'}`}>
                 AI features for Quiz generation are currently unavailable.
@@ -1143,7 +1234,7 @@ const App: React.FC = () => {
             setStudyStrategies([]); 
         }}
       />
-      {ai && ( 
+      {ai && (
         <FeelingCheckModal
           isOpen={isFeelingCheckModalOpen}
           onClose={handleFeelingCheckModalClose}
@@ -1152,6 +1243,15 @@ const App: React.FC = () => {
           onFeelingSubmit={handleFeelingCheckSubmit}
           easyChapterSuggestions={easyChapterSuggestions}
           onNavigateToChapter={handleNavigateFromSuggestion}
+        />
+      )}
+      {editingTaskInfo && (
+        <TaskNotesModal
+          isOpen={isTaskNotesModalOpen}
+          onClose={handleCloseTaskNotesModal}
+          taskText={editingTaskInfo.taskText}
+          currentNotes={editingTaskInfo.currentNotes}
+          onSaveNotes={(newNotes) => handleSaveTaskNotes(editingTaskInfo.taskId, newNotes)}
         />
       )}
     <FarewellPopup
