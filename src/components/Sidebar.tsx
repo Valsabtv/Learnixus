@@ -1,6 +1,6 @@
 import React from 'react';
 import { APP_NAME, LIGHT_ACCENT_COLOR, DARK_ACCENT_COLOR } from '../constants';
-import { BookOpenIcon, PlusIcon, FireIcon, XIcon, LayoutDashboardIcon, DocumentTextIcon, Cog6ToothIcon, ClipboardDocumentCheckIcon, ArrowRightStartOnRectangleIcon } from './IconComponents'; 
+import { BookOpenIcon, PlusIcon, FireIcon, XIcon, LayoutDashboardIcon, DocumentTextIcon, Cog6ToothIcon, ClipboardDocumentCheckIcon, ArrowRightStartOnRectangleIcon, ListBulletIcon } from './IconComponents'; 
 import { useTheme } from '../contexts/ThemeContext';
 import { ActiveView } from '../types'; 
 
@@ -140,8 +140,8 @@ const Sidebar: React.FC<SidebarProps> = ({
       <nav className="space-y-1.5 flex-grow"> {/* Slightly reduced spacing for nav items */}
         <NavButton view="dashboard" label="Dashboard" Icon={LayoutDashboardIcon} />
         <NavButton view="subjects" label="My Learning" Icon={BookOpenIcon} />
+        <NavButton view="dailyTasks" label="Daily Tasks" Icon={ListBulletIcon} />
         <NavButton view="examPrep" label="Exam Prep Hub" Icon={ClipboardDocumentCheckIcon} />
-        <NavButton view="dailyTasks" label="Daily Tasks" Icon={ClipboardDocumentCheckIcon} />
         <NavButton view="personalNotes" label="Personal Notes" Icon={DocumentTextIcon} />
         <NavButton view="video" label="Focus Mode" Icon={FireIcon} />
       </nav>

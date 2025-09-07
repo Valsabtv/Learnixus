@@ -60,7 +60,7 @@ const Layout: React.FC<LayoutProps> = ({
 
   const mainContentBgClass = theme === 'light' ? 'bg-slate-100' : theme === 'dark' ? 'bg-slate-900' : 'bg-black'; 
 
-  const showContentHeader = activeView === 'dashboard' || activeView === 'subjects' || activeView === 'personalNotes' || activeView === 'examPrep' || activeView === 'video';
+  const showContentHeader = activeView === 'dashboard' || activeView === 'subjects' || activeView === 'personalNotes' || activeView === 'examPrep' || activeView === 'video' || activeView === 'dailyTasks';
 
 
   return (
