@@ -495,20 +495,20 @@ Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining con
   }, [setSubjects]);
 
   const handleGenerateQuiz = useCallback(async (subjectId: string, chapterId: string, chapterName: string, subjectName: string, numQuestions?: number, currentUserStudyLevel?: string) => {
-    const currentStudyLevelToUse = currentUserStudyLevel || "General";
+    const currentStudyLevelToUse = currentUserStudyLevel || userStudyLevel;
     if (!ai) {
         setQuizError("AI features are currently unavailable (AI client not initialized). Please check API Key setup.");
         setIsQuizModalOpen(true);
         setQuizLoading(false);
-        setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: currentStudyLevelToUse, questions: [] });
+        setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: currentStudyLevelToUse || 'General', questions: [] });
         addNotification("Quiz generation failed: AI client not available.", 'error');
         return;
     }
-    if (!currentUserStudyLevel) {
+    if (!currentStudyLevelToUse) {
       setQuizError("Please set your study level in settings before generating a quiz.");
       setIsQuizModalOpen(true);
       setQuizLoading(false);
-      setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: currentStudyLevelToUse, questions: [] });
+      setActiveQuizData({ subjectId, chapterId, chapterName, subjectName, userStudyLevel: 'General', questions: [] });
       addNotification("Please set your study level in settings to generate a quiz.", 'warning');
       return;
     }
@@ -1022,6 +1022,7 @@ Example: ["${userName || 'Learner'}, try the Feynman Technique by explaining con
             isDashboardActive={activeView === 'dashboard'} 
             userName={userName} 
             onLogPomodoroActivity={logPomodoroActivity}
+            setActiveView={setActiveView}
         />
 
         {activeView === 'dashboard' && (

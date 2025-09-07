@@ -30,13 +30,16 @@ interface PomodoroStateFromStorage {
 
 type TimerMode = 'work' | 'shortBreak' | 'longBreak';
 
+import { ActiveView } from '../types';
+
 interface PomodoroTimerProps {
   isDashboardActive: boolean;
   userName: string;
   onLogPomodoroActivity: (durationInMinutes: number) => void;
+  setActiveView: (view: ActiveView) => void;
 }
 
-const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userName, onLogPomodoroActivity }) => {
+const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userName, onLogPomodoroActivity, setActiveView }) => {
   const { theme } = useTheme();
   const { addNotification } = useNotification();
   const accentColorName = theme === 'light' ? LIGHT_ACCENT_COLOR.split('-')[0] : DARK_ACCENT_COLOR.split('-')[0];
@@ -158,7 +161,7 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   const workerRef = useRef<Worker | null>(null);
 
   useEffect(() => {
-    workerRef.current = new Worker(new URL('../workers/timerWorker.ts', import.meta.url), { type: 'module' });
+    workerRef.current = new Worker(new URL('../workers/timerWorker.ts', import.meta.url));
 
     workerRef.current.onmessage = (e: MessageEvent) => {
       const { type, timeLeft: newTimeLeft } = e.data;
@@ -198,47 +201,8 @@ const PomodoroTimer: React.FC<PomodoroTimerProps> = ({ isDashboardActive, userNa
   useEffect(() => {
     if (isActive) {
       document.title = `${formatTime(timeLeft)} - ${modeText(mode)} - ${APP_NAME}`;
-      if (isMobileDevice()) {
-        toast.custom(
-          (t) => (
-            <div
-              className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
-              <div className="flex-1 w-0 p-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 pt-0.5">
-                    <PlayIcon className="h-10 w-10 text-green-400" />
-                  </div>
-                  <div className="ml-3 flex-1">
-                    <p className="text-sm font-medium text-gray-900">
-                      {modeText(mode)}
-                    </p>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {formatTime(timeLeft)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex border-l border-gray-200">
-                <button
-                  onClick={() => toast.dismiss(t.id)}
-                  className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-indigo-600 hover:text-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          ),
-          {
-            id: 'mini-timer-toast',
-            duration: Infinity,
-          }
-        );
-      }
     } else {
       document.title = originalDocTitleRef.current;
-      if (isMobileDevice()) {
-        toast.dismiss('mini-timer-toast');
-      }
     }
     updateTimerStateInLocalStorage();
   }, [timeLeft, isActive, mode, updateTimerStateInLocalStorage]);
